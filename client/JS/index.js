@@ -14,6 +14,7 @@ function send(msg = text.send.value) {
 	if (msg.startsWith(prefix)) {
 		return;
 	}
+	msg = msg.trim();
 	sendMessage(msg);
 	text.send.value = '';
 } //send
@@ -29,23 +30,30 @@ function load(e) {
 	sock.on("message", (msg, nick) => {
 		message(msg, nick);
 	});
-	sock.once("connect", () => text.area.innerHTML = '');
+	sock.once("connect", () => {
+		text.area.innerHTML = '';
+		message("This is a Beta version of a chatting service, upcoming features are: profile picture support, message history view, spam defense, multiple chatrooms and more security!", "<b>System</b>");
+		message("<u>Please be kind and don't spam, we have means of banning aggitators.</u>", "<b>System</b>");
+	});
 } //load
 
 function sendMessage(msg) {
-	if (sock.connected) {
+	if (!msg) {
+		message("<font style='color: red'><b>You cannot send an empty message!</b></font>", "<b>System</b>");
+	} else if (sock.connected) {
 		message(msg, nick);
 		sock.send(msg);
 	} else {
-		message("<font style='color: red'><b>You cannot send messages while disconnected!</b></font>", "System");
+		message("<font style='color: red'><b>You cannot send messages while disconnected!</b></font>", "<b>System</b>");
 	}
 } //sendMessage
 
 function message(msg, user) {
 	let p = document.createElement("p");
 	p.innerHTML = `<b>${user}:</b> ${msg}<br />`;
-
+	
 	text.area.appendChild(p);
+	text.area.scrollBy(0, 100 + p.offsetHeight);
 } //message
 
 function shiftcheck(event, down = true) {

@@ -10,7 +10,7 @@
 	sock.once("allow", () => console.log("Successful Login."));
 	sock.once("connect", () => sock.emit("auth", nick));
 	sock.once("disconnect", () => {
-		alert("You have been disconnected.");
+		alert("You have been disconnected. Attempting reconnect(s)...");
 	});
 } //auth
 

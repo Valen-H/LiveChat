@@ -54,7 +54,6 @@ io.of("/chat").on("connection", sock => {
 	sock.join("chat");
 	sock.on("auth", nick => {
 		sock.nick = nick;
-		console.log(exports.users);
 		if (Array.from(exports.users.values()).includes(nick)) {
 			sock.emit("disallow", "Username is Taken.");
 		} else {

@@ -2843,3 +2843,129 @@ Issued: '.s git commit -a -m"Initial"' at Sat Dec 22 2018 21:57:55 GMT+0200 (Eas
 Issued: '.s git checkout' at Sat Dec 22 2018 21:58:11 GMT+0200 (Eastern European Standard Time)
 0
 Issued: '.e' at Sat Dec 22 2018 21:58:19 GMT+0200 (Eastern European Standard Time)
+Server launched at Sat Dec 22 2018 22:01:14 GMT+0200 (Eastern European Standard Time)
+Process 20144 Listening to port 8080
+Process 9648 Listening to port 8080
+Process 28640 Listening to port 8080
+Process 21552 Listening to port 8080
+Process 18548 Listening to port 8080
+Process 28236 Listening to port 8080
+Process 25120 Listening to port 8080
+Process 25632 Listening to port 8080
+Process 22196 Listening to port 8080
+Process 9308 Listening to port 8080
+Process 11912 Listening to port 8080
+Process 4708 Listening to port 8080
+Received GET / 1.1 by IPv6 ::1 50282
+[object Map]
+aQfO8v4te1BZz0UPAAAB [::ffff:127.0.0.1] joined as: ok
+aQfO8v4te1BZz0UPAAAB [::ffff:127.0.0.1] ok quit.
+wsd4txtSoZTi_1loAAAC [::ffff:127.0.0.1] undefined quit.
+TccrjbBGyd8ar-zmAAAA [::ffff:127.0.0.1] undefined quit.
+Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 50294
+[object Map]
+qgwjKJRvVftL0nJQAAAB [::ffff:127.0.0.1] joined as: ok
+4pfyXofAlKIW9lwfAAAA [::ffff:127.0.0.1] undefined quit.
+0
+qgwjKJRvVftL0nJQAAAB [::ffff:127.0.0.1] ok quit.
+Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 50307
+[object Map]
+zywxhrK3pc660n4SAAAD [::ffff:127.0.0.1] joined as: ok
+zywxhrK3pc660n4SAAAD [::ffff:127.0.0.1] ok quit.
+Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 50315
+[object Map]
+1hoKhKnQF-Z31NaGAAAE [::ffff:127.0.0.1] joined as: ok
+0
+1hoKhKnQF-Z31NaGAAAE [::ffff:127.0.0.1] ok quit.
+Received GET / 1.1 by IPv6 ::1 50341
+[object Map]
+-SbQo9LuDr0UfB9GAAAF [::1] joined as: ok
+0
+-SbQo9LuDr0UfB9GAAAF [::1] ok quit.
+Received GET / 1.1 by IPv6 ::1 50351
+[object Map]
+XxliaVTm2PbBAI9cAAAG [::1] joined as: ok
+0
+XxliaVTm2PbBAI9cAAAG [::1] ok quit.
+Received GET / 1.1 by IPv6 ::1 50360
+[object Map]
+Sd1_OkCdXlFPCOOMAAAH [::1] joined as: ok
+0
+Sd1_OkCdXlFPCOOMAAAH [::1] ok quit.
+Received GET / 1.1 by IPv6 ::1 50373
+[object Map]
+xPkzOE--h79AlBibAAAI [::1] joined as: ok
+0
+0
+xPkzOE--h79AlBibAAAI [::1] ok quit.
+Received GET / 1.1 by IPv6 ::1 50390
+[object Map]
+HIQOUKoKqfTaqic6AAAD [::1] joined as: ok
+Issued: '.reload' at Sat Dec 22 2018 22:08:13 GMT+0200 (Eastern European Standard Time)
+Server launched at Sat Dec 22 2018 22:08:14 GMT+0200 (Eastern European Standard Time)
+Process 18748 Listening to port 8080
+Process 8112 Listening to port 8080
+Process 24848 Listening to port 8080
+Process 27396 Listening to port 8080
+Process 26632 Listening to port 8080
+Process 4152 Listening to port 8080
+Process 28444 Listening to port 8080
+Process 20100 Listening to port 8080
+Process 10004 Listening to port 8080
+Process 7900 Listening to port 8080
+Process 27436 Listening to port 8080
+Process 22772 Listening to port 8080
+sgfp5HBg5p9mchEDAAAA [::ffff:127.0.0.1] undefined quit.
+Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 50482
+NuV0gg8--7bFgMjRAAAB [::ffff:127.0.0.1] joined as: ok
+0
+ZEIwGUS32hB9fyxmAAAA [::1] undefined quit.
+NuV0gg8--7bFgMjRAAAB [::ffff:127.0.0.1] ok quit.
+Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 50496
+vckTMHvzKAetiCTAAAAD [::ffff:127.0.0.1] joined as: ok
+0
+vckTMHvzKAetiCTAAAAD [::ffff:127.0.0.1] ok quit.
+Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 50505
+TRbPB0skRw2BJorfAAAE [::ffff:127.0.0.1] joined as: ok
+0
+0
+0
+TRbPB0skRw2BJorfAAAE [::ffff:127.0.0.1] ok quit.
+Received GET / 1.1 by IPv6 ::1 50524
+HJ34aJhp_9f1s06HAAAF [::1] joined as: ok
+HJ34aJhp_9f1s06HAAAF [::1] ok quit.
+0
+0
+0
+4foGZvKevITRNRSUAAAB [::1] undefined quit.
+Received GET / 1.1 by IPv6 ::1 50613
+QsKTBBVjlnBxeXbNAAAC [::1] joined as: ok
+0
+Issued: '.reload' at Sat Dec 22 2018 22:17:12 GMT+0200 (Eastern European Standard Time)
+Server launched at Sat Dec 22 2018 22:17:13 GMT+0200 (Eastern European Standard Time)
+Process 11280 Listening to port 8080
+Process 26596 Listening to port 8080
+Process 12928 Listening to port 8080
+Process 5412 Listening to port 8080
+Process 22436 Listening to port 8080
+Process 21260 Listening to port 8080
+Process 6100 Listening to port 8080
+Process 27964 Listening to port 8080
+Process 12620 Listening to port 8080
+Process 21172 Listening to port 8080
+Process 27260 Listening to port 8080
+Process 26576 Listening to port 8080
+Issued: '.s git add .' at Sat Dec 22 2018 22:17:33 GMT+0200 (Eastern European Standard Time)
+0
+Issued: '.s git checkout' at Sat Dec 22 2018 22:17:39 GMT+0200 (Eastern European Standard Time)
+0
+DwfP8kZUfmsz7Y3IAAAA [::ffff:127.0.0.1] undefined quit.
+Issued: 'exports.users' at Sat Dec 22 2018 22:17:55 GMT+0200 (Eastern European Standard Time)
+Map {}
+wpz7tw32UESY368qAAAB [::ffff:127.0.0.1] undefined quit.
+8j-nwuPfahaqulTKAAAB [::ffff:127.0.0.1] undefined quit.
+Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 50710
+Y8k-ohGXsMCJiaOgAAAC [::ffff:127.0.0.1] joined as: ok
+8erIEMH_JtVcu-eBAAAA [::ffff:127.0.0.1] undefined quit.
+Y8k-ohGXsMCJiaOgAAAC [::ffff:127.0.0.1] ok quit.
+Issued: '.e' at Sat Dec 22 2018 22:18:30 GMT+0200 (Eastern European Standard Time)
