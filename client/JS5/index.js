@@ -1,0 +1,6 @@
+"use strict";var text={shift:!1,area:null,send:null},prefix="!!";for(window.nick="guest_"+Math.round(1e5*Math.random());!(nick=prompt("Insert a Nickname:",nick))||!/^[a-zA-Z0-9_\-()]+$/i.test(nick););function send(){var a=0<arguments.length&&arguments[0]!==void 0?arguments[0]:text.send.value;a.startsWith(prefix)||(sendMessage(a),text.send.value="")}//send
+function load(){console.log("Index loaded"),text.area=document.getElementById("msgarea"),text.send=document.getElementById("txtarea"),auth(nick),sock.on("message",function(a,b){message(a,b)}),sock.once("connect",function(){return text.area.innerHTML=""})}//load
+function sendMessage(a){sock.connected?(message(a,nick),sock.send(a)):message("<font style='color: red'><b>You cannot send messages while disconnected!</b></font>","System")}//sendMessage
+function message(a,b){var c=document.createElement("p");c.innerHTML="<b>".concat(b,":</b> ").concat(a,"<br />"),text.area.appendChild(c)}//message
+function shiftcheck(a){var b=!(1<arguments.length&&arguments[1]!==void 0)||arguments[1];"Shift"==a.key&&(text.shift=b),"Enter"!=a.key||text.shift||b||send()}//shiftcheck
+function submit(){text.shift=!1,shiftcheck({key:"Enter"},!1)}window.addEventListener("load",load);

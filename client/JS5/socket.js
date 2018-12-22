@@ -1,0 +1,2 @@
+"use strict";//auth
+window.auth=function(a){window.sock=io.connect("/chat",{reconnectionAttempts:50}),sock.once("disallow",function(a){alert(a),location.reload()}),sock.once("allow",function(){return console.log("Successful Login.")}),sock.once("connect",function(){return sock.emit("auth",a)}),sock.once("disconnect",function(){alert("You have been disconnected.")})},console.log("Sockets Loaded.");

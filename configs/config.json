@@ -1,0 +1,8 @@
+{
+	"port": 8080,
+	"ipcPort": 9090,
+	"ipcPass": "ipcPasss",
+	"localpath": "./client",
+	"prefix": "\\.",
+	"logfile": "livechat.log"
+}

@@ -1,0 +1,3 @@
+C:\Users\CodeDragon\Desktop\workspace\Node\livechat\obj\Debug\livechat.njsprojAssemblyReference.cache
+C:\Users\CodeDragon\Desktop\workspace\Node\livechat\obj\Debug\livechat.njsproj.CoreCompileInputs.cache
+C:\Users\CodeDragon\Desktop\workspace\Node\livechat\bin\Microsoft.NodejsTools.WebRole.dll

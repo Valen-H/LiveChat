@@ -1,0 +1,46 @@
+﻿<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta charset="utf-8" />
+	<title>Live Chat</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<meta name="description" content="A live chating app" />
+	<meta name="keywords" content="chat, react, app, html, js, css, express, node, babel" />
+	<meta name="author" content="V. H., alternativexxxy@gmail.com" />
+	<meta name="copyright" content="V. H. 2k18" />
+	<meta name="designer" content="V. H., alternativexxxy@gmail.com" />
+	<meta name="owner" content="V. H., alternativexxxy@gmail.com" />
+	<meta name="reply-to" content="alternativexxxy@gmail.com" />
+	<meta name="robots" content="noindex, follow, noimageindex" />
+	<meta name="pagename" content="LiveChat" />
+	<meta name="revised" content="22-Dec-18" />
+	<meta name="topic" content="Chat" />
+	<meta name="summary" content="App" />
+	<meta name="Classification" content="Service" />
+	<!--<script type="text/javascript" src="https://unpkg.com/babel-standalone/babel.min.js" crossorigin="anonymous"></script>
+	<!--<script type="text/javascript" src="https://unpkg.com/react/umd/react.production.min.js" crossorigin="anonymous"></script>
+	<script type="text/javascript" src="https://unpkg.com/react-dom/umd/react-dom.production.min.js" crossorigin="anonymous"></script>-->
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/prefixfree/1.0.7/prefixfree.min.js"></script>
+	<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+	<script type="text/javascript" src="JS5/polyfill.min.js"></script>
+	<script type="text/javascript" src="JS5/socket.js" defer></script>
+	<script type="text/javascript" src="JS5/index.js" defer></script>
+	<link rel="author" href="https://about.me/m-iliakis/" type="html/sandboxed" />
+	<link rel="me" type="text/html" href="https://about.me/m-iliakis/" />
+	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+	<link rel="fluid-icon" type="image/png" href="favicon.png" />
+	<link rel="logo" type="image/png" href="favicon.png" />
+	<link rel="icon" href="favicon.ico" type="image/ico" />
+	<link type="text/css" rel="stylesheet" href="CSS/main.css" />
+</head>
+<body>
+	<div id="body-wrapper">
+		<div id="msgarea">
+			Loading...
+		</div><br />
+		<textarea id="txtarea" placeholder="Message..." onkeydown="shiftcheck(event, true)" onkeyup="shiftcheck(event, false)"></textarea><br />
+		<button id="submit" onclick="submit(event)">Send</button>
+	</div>
+</body>
+</html>
