@@ -1,1 +1,3 @@
-dist
+client/dist
+*.log
+node_modules
