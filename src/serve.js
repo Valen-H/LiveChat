@@ -13,7 +13,8 @@ const app = express(),
 	server = http.Server(app),
 	io = socket(server, {
 		pingInterval: 10000,
-		pingTimeout: 2000,
+		pingTimeout: 3000,
+		serveClient: true,
 		path: "/chat"
 	}),
 	client = socketc.connect("http://localhost:" + config.ipcPort + "/ipc", {
@@ -23,18 +24,11 @@ const app = express(),
 client.on("connect", () => {
 	client.emit("auth", config.ipcPass);
 	client.once("ok", () => {
-		client.emit("copy", "users", data => {
-			data = new Map(data);
-			exports.users = data;
-		});
-		client.emit("copy", "msgs", data => {
-			data = new Map(data);
-			exports.msgs = data;
-		});
-		client.on("update", (prop, data) => {
-			data = new Map(data);
+		client.on("update", (prop, ...data) => {
+			data = prop == "users" ? (new Map(data)) : data;
 			exports[prop] = data;
 		});
+		client.on("dispatch", (...data) => io.of("/chat").in("chat").volatile.emit(...data));
 	});
 });
 
@@ -66,16 +60,20 @@ io.of("/chat").on("connection", sock => {
 				id: sock.conn.id,
 				nick: nick
 			});
-			io.of("/chat").in("chat").emit("message", `User '<u>${nick}</u>' has <font style='color: green;'>joined</font> the chat! <small>${Date()}</small>`, "<b>SYSTEM</b>");
+			sock.emit("history", ...exports.msgs);
+			client.emit("dispatch", "message", `User '<u>${nick}</u>' has <font style='color: green;'>joined</font> the chat! <small>${Date()}</small>`, "<b>SYSTEM</b>");
 			sock.emit("allow");
 			console.log(chalk`{yellow.dim.italic ${sock.conn.id}} [${sock.conn.remoteAddress}] joined as: {yellow.dim.bold ${nick}}`);
 			sock.on("message", msg => {
-				client.emit("addmsg", sanitize(msg), sanitize(nick));
-				io.of("/chat").in("chat").volatile.send(sanitize(msg), sanitize(nick));
+				client.emit("addmsg", {
+					msg: sanitize(msg),
+					user: sanitize(nick)
+				});
+				client.emit("dispatch", "message", sanitize(msg), sanitize(nick));
 			});
 			sock.once("disconnect", () => {
 				client.emit("rmuser", sock.conn.id);
-				io.of("/chat").in("chat").emit("message", `User '<u>${sock.nick}</u>' has <font style='color: red;'>left</font> the chat... <small>${Date()}</small>`, "<b>SYSTEM</b>");
+				client.emit("dispatch", "message", `User '<u>${sock.nick}</u>' has <font style='color: red;'>left</font> the chat... <small>${Date()}</small>`, "<b>SYSTEM</b>");
 				console.log(chalk`{yellow.dim.italic ${sock.conn.id}} [${sock.conn.remoteAddress}] {yellow.dim.bold ${sock.nick}} quit.`);
 			});
 		}

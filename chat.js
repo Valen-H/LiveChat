@@ -26,8 +26,12 @@ util.inspect.defaultOptions.getters = util.inspect.defaultOptions.sorted = util.
 util.inspect.defaultOptions.depth = 3;
 util.inspect.defaultOptions.maxArrayLength = 50;
 
+for (let i in process.env) {
+	config[i] = process.env[i];
+}
+
 exports.users = new Map();
-exports.msgs = new Map();
+exports.msgs = [ ];
 
 const logs = exports.log = fs.createWriteStream(config.logfile, {
 	flags: 'a+',
@@ -91,7 +95,7 @@ if (cluster.isMaster) {
 		cookie: false
 	});
 
-	ipc.of("ipc").on("connection", sock => {
+	ipc.of("/ipc").on("connection", sock => {
 		sock.once("auth", code => {
 			if (code != config.ipcPass) {
 				sock.emit("disallowed");
@@ -99,11 +103,10 @@ if (cluster.isMaster) {
 				return;
 			}
 			sock.join("ipc");
-			sock.on("copy", (param, cb) => {
-				cb(Array.from(exports[param]));
-			});
 			sock.on("adduser", adduser);
 			sock.on("rmuser", rmuser);
+			sock.on("addmsg", addmsg);
+			sock.on("dispatch", (...data) => ipc.of("/ipc").in("ipc").volatile.emit("dispatch", ...data));
 			sock.emit("ok");
 		});
 	});
@@ -177,6 +180,14 @@ process.on("unhandledRejection", err => {
 });
 
 
+function addmsg(msg) {
+	exports.msgs.push([msg.user, msg.msg]);
+	while (exports.msgs.length > config.maxMsgs) {
+		exports.msgs.shift();
+	}
+	update("msgs");
+} //addmsg
+
 function adduser(user) {
 	exports.users.set(user.id, user.nick);
 	update("users");
@@ -188,7 +199,8 @@ function rmuser(id) {
 } //rmuser
 
 function update(prop) {
-	return exports.ipc.of("ipc").to("ipc").emit("update", prop, Array.from(exports[prop]));
+	let params = prop == "users" ? Array.from(exports[prop]) : exports[prop];
+	return exports.ipc.of("/ipc").to("ipc").emit("update", prop, ...params);
 } //update
 
 
