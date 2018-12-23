@@ -18,7 +18,7 @@
   "author": "V.H.",
   "license": "ISC",
   "dependencies": {
-    "@babel/polyfill": "^7.2.3",
+    "@babel/polyfill": "^7.2.5",
     "chalk": "^2.4.1",
     "express": "^4.16.4",
     "fs-extra": "^7.0.1",
