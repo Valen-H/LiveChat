@@ -1,4 +1,4 @@
-﻿/**
+﻿/** @TODO
  * ADD MULTIPLE ROOMS, PROFILES AND BANS/REQUEST-TIMEOUT, MESSAGE HISTORY
  */
 
@@ -157,6 +157,11 @@ if (cluster.isMaster) {
 			syscall("npm run build").once("close", () => exports.compiling = false);
 			exports.compiling = true;
 		}
+		});
+
+	process.once("exit", code => {
+		console.info(chalk.cyan(code));
+		exports.log.write("Master exited at '" + Date() + `' with ${code}\n`);
 	});
 } else {
 	require("./src/serve.js");
@@ -169,11 +174,6 @@ process.on("uncaughtException", err => {
 
 process.on("unhandledRejection", err => {
 	console.error(chalk.redBright(util.inspect(err)));
-});
-
-process.once("exit", code => {
-	console.info(chalk.cyan(code));
-	exports.log.write("Master exited at '" + Date() + `' with ${code}\n`);
 });
 
 

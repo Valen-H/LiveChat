@@ -19,13 +19,13 @@
 	<meta name="summary" content="App" />
 	<meta name="Classification" content="Service" />
 	<!--<script type="text/javascript" src="https://unpkg.com/babel-standalone/babel.min.js" crossorigin="anonymous"></script>
-	<!--<script type="text/javascript" src="https://unpkg.com/react/umd/react.production.min.js" crossorigin="anonymous"></script>
+	<script type="text/javascript" src="https://unpkg.com/react/umd/react.production.min.js" crossorigin="anonymous"></script>
 	<script type="text/javascript" src="https://unpkg.com/react-dom/umd/react-dom.production.min.js" crossorigin="anonymous"></script>-->
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/prefixfree/1.0.7/prefixfree.min.js"></script>
-	<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+	<script type="text/javascript" src="/chat/socket.io.js"></script>
 	<script type="text/javascript" src="JS5/polyfill.min.js"></script>
 	<script type="text/javascript" src="JS5/socket.js" defer></script>
-	<script type="text/javascript" src="JS5/index.js" defer></script>
+	<script type="text/javascript" src="JS/index.js" defer></script>
 	<link rel="author" href="https://about.me/m-iliakis/" type="html/sandboxed" />
 	<link rel="me" type="text/html" href="https://about.me/m-iliakis/" />
 	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
@@ -39,7 +39,7 @@
 		<div id="msgarea">
 			Loading...
 		</div><br />
-		<textarea id="txtarea" placeholder="Message..." onkeydown="shiftcheck(event, true)" onkeyup="shiftcheck(event, false)"></textarea><br />
+		<textarea id="txtarea" placeholder="Message..." onkeydown="shiftcheck(event, true)" onkeyup="shiftcheck(event, false)" autofocus required></textarea><br />
 		<button id="submit" onclick="submit(event)">Send</button>
 	</div>
 </body>

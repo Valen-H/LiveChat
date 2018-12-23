@@ -32,19 +32,19 @@ function load(e) {
 	});
 	sock.once("connect", () => {
 		text.area.innerHTML = '';
-		message("This is a Beta version of a chatting service, upcoming features are: profile picture support, message history view, spam defense, multiple chatrooms and more security!", "<b>System</b>");
-		message("<u>Please be kind and don't spam, we have means of banning aggitators.</u>", "<b>System</b>");
+		message("This is a Beta version of a chatting service, upcoming features are: profile picture support, message history view, spam defense, multiple chatrooms and more security!", "<b>SYSTEM</b>");
+		message("<u>Please be kind and don't spam, we have means of banning aggitators.</u>", "<b>SYSTEM</b>");
+		console.info("The prefix is !!, type !!help in chat for commands.");
 	});
 } //load
 
 function sendMessage(msg) {
 	if (!msg) {
-		message("<font style='color: red'><b>You cannot send an empty message!</b></font>", "<b>System</b>");
-	} else if (sock.connected) {
-		message(msg, nick);
+		message("<font style='color: red'><b>You cannot send an empty message!</b></font>", "<b>SYSTEM</b>");
+	} else if (sock.connected && !sock.disconnected) {
 		sock.send(msg);
 	} else {
-		message("<font style='color: red'><b>You cannot send messages while disconnected!</b></font>", "<b>System</b>");
+		message("<font style='color: red'><b>You cannot send messages while disconnected!</b></font>", "<b>SYSTEM</b>");
 	}
 } //sendMessage
 
@@ -53,8 +53,9 @@ function message(msg, user) {
 	p.innerHTML = `<b>${user}:</b> ${msg}<br />`;
 	
 	text.area.appendChild(p);
-	text.area.scrollBy(0, 100 + p.offsetHeight);
+	text.area.scrollHeight += p.offsetHeight * 2;
 } //message
+window.message = message;
 
 function shiftcheck(event, down = true) {
 	if (event.key == "Shift") {
@@ -70,6 +71,15 @@ function submit(event) {
 	shiftcheck({
 		key: "Enter"
 	}, false);
-}
+} //submit
 
-window.addEventListener("load", load);
+function sanitize(msg) {
+	msg = msg.replace(/&/gmi, "&amp;")
+		.replace(/</gmi, "&lt;")
+		.replace(/>/gmi, "&gt;")
+		.replace(/"/gmi, "&quot;")
+		.replace(/'/gmi, "&#039;");
+	return msg;
+} //sanitize
+
+window.addEventListener("DOMContentLoaded", load);

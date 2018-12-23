@@ -11,7 +11,11 @@ const app = express(),
 	parent = module.parent.exports,
 	config = parent.config,
 	server = http.Server(app),
-	io = socket(server),
+	io = socket(server, {
+		pingInterval: 10000,
+		pingTimeout: 2000,
+		path: "/chat"
+	}),
 	client = socketc.connect("http://localhost:" + config.ipcPort + "/ipc", {
 		path: "/ipc"
 	});
@@ -51,26 +55,38 @@ server.listen(config.port, () => {
 });
 
 io.of("/chat").on("connection", sock => {
-	sock.join("chat");
 	sock.on("auth", nick => {
 		sock.nick = nick;
 		if (Array.from(exports.users.values()).includes(nick)) {
 			sock.emit("disallow", "Username is Taken.");
+			sock.disconnect(true);
 		} else {
+			sock.join("chat");
 			client.emit("adduser", {
 				id: sock.conn.id,
 				nick: nick
 			});
+			io.of("/chat").in("chat").emit("message", `User '<u>${nick}</u>' has <font style='color: green;'>joined</font> the chat! <small>${Date()}</small>`, "<b>SYSTEM</b>");
 			sock.emit("allow");
 			console.log(chalk`{yellow.dim.italic ${sock.conn.id}} [${sock.conn.remoteAddress}] joined as: {yellow.dim.bold ${nick}}`);
 			sock.on("message", msg => {
-				client.emit("addmsg", msg, nick);
-				sock.broadcast.to("chat").send(msg, nick);
+				client.emit("addmsg", sanitize(msg), sanitize(nick));
+				io.of("/chat").in("chat").volatile.send(sanitize(msg), sanitize(nick));
+			});
+			sock.once("disconnect", () => {
+				client.emit("rmuser", sock.conn.id);
+				io.of("/chat").in("chat").emit("message", `User '<u>${sock.nick}</u>' has <font style='color: red;'>left</font> the chat... <small>${Date()}</small>`, "<b>SYSTEM</b>");
+				console.log(chalk`{yellow.dim.italic ${sock.conn.id}} [${sock.conn.remoteAddress}] {yellow.dim.bold ${sock.nick}} quit.`);
 			});
 		}
 	});
-	sock.once("disconnect", () => {
-		client.emit("rmuser", sock.conn.id);
-		console.log(chalk`{yellow.dim.italic ${sock.conn.id}} [${sock.conn.remoteAddress}] {yellow.dim.bold ${sock.nick}} quit.`);
-	});
 });
+
+function sanitize(msg) {
+	msg = msg.replace(/&/gmi, "&amp;")
+		.replace(/</gmi, "&lt;")
+		.replace(/>/gmi, "&gt;")
+		.replace(/"/gmi, "&quot;")
+		.replace(/'/gmi, "&#039;");
+	return msg;
+} //sanitize
