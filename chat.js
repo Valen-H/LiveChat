@@ -78,6 +78,7 @@ let commands = exports.commands = {
 		});
 		return true;
 	}),
+	localeval: new classes.Command('^' + config.prefix + "e(v(al)?)? .+$", line => transmit("localeval", drop(line))),
 	eval: new classes.Command('', line => console.log(chalk.gray(util.inspect(eval(line)))) || true),
 };
 
@@ -180,6 +181,10 @@ process.on("unhandledRejection", err => {
 });
 
 
+function transmit(...data) {
+	return exports.ipc.of("/ipc").to("ipc").volatile.emit(...data);
+} //transmit
+
 function addmsg(msg) {
 	exports.msgs.push([msg.user, msg.msg]);
 	while (exports.msgs.length > config.maxMsgs) {
@@ -200,7 +205,7 @@ function rmuser(id) {
 
 function update(prop) {
 	let params = prop == "users" ? Array.from(exports[prop]) : exports[prop];
-	return exports.ipc.of("/ipc").to("ipc").emit("update", prop, ...params);
+	return exports.ipc.of("/ipc").to("ipc").volatile.emit("update", prop, ...params);
 } //update
 
 

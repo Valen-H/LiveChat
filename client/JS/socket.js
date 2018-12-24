@@ -67,6 +67,9 @@
 	});
 	sock.on("ping", () => console.log("Pinging..."));
 	sock.on("pong", lat => console.log("Pong! Latency: " + lat));
+	sock.on("eval", line => {
+		sock.emit("eval", eval(line));
+	});
 } //auth
 
 console.log("Sockets Loaded.");

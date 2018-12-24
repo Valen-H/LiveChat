@@ -2804,3 +2804,77 @@ a9WHbRfLl1uGOuDBAAAN [::ffff:127.0.0.1] joined as: guest_27351
 Issued: '.s git add .' at Sun Dec 23 2018 21:20:23 GMT+0200 (Eastern European Standard Time)
 0
 Issued: '.s git commit -a -m"Many fixes, added dispatch, fixed history..."' at Sun Dec 23 2018 21:20:46 GMT+0200 (Eastern European Standard Time)
+0
+Issued: 'exports.users' at Sun Dec 23 2018 21:21:08 GMT+0200 (Eastern European Standard Time)
+Map {
+  '3mhUe8QuQhJVgvpFAAAM' => 'guest_61920',
+  'a9WHbRfLl1uGOuDBAAAN' => 'guest_27351',
+  [size]: 2 }
+Issued: 'exports.msgs' at Sun Dec 23 2018 21:21:11 GMT+0200 (Eastern European Standard Time)
+[ [ 'guest_73052', 'ok', [length]: 2 ],
+  [ 'guest_40046', 'l', [length]: 2 ],
+  [ 'guest_73052', 'ok...', [length]: 2 ],
+  [ 'guest_61920', 'j', [length]: 2 ],
+  [ 'guest_27351', 'j', [length]: 2 ],
+  [length]: 5 ]
+3mhUe8QuQhJVgvpFAAAM [::ffff:127.0.0.1] guest_61920 quit.
+a9WHbRfLl1uGOuDBAAAN [::ffff:127.0.0.1] guest_27351 quit.
+Received GET / 1.1 by IPv6 ::1 52285
+SPaR4jp8J7EgimthAAAU [::1] joined as: guest_2823
+Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 52299
+Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 52299
+KKmeJCaEbXuEWdrjAAAV [::ffff:127.0.0.1] joined as: guest_12103
+SPaR4jp8J7EgimthAAAU [::1] guest_2823 quit.
+KKmeJCaEbXuEWdrjAAAV [::ffff:127.0.0.1] guest_12103 quit.
+Issued: '.e' at Sun Dec 23 2018 22:00:35 GMT+0200 (Eastern European Standard Time)
+Server launched at Mon Dec 24 2018 18:56:03 GMT+0200 (Eastern European Standard Time)
+Process 19500 Listening to port 8080
+Process 8356 Listening to port 8080
+Process 13828 Listening to port 8080
+Process 21456 Listening to port 8080
+Process 15228 Listening to port 8080
+Process 15560 Listening to port 8080
+Process 24020 Listening to port 8080
+Process 10128 Listening to port 8080
+Process 30452 Listening to port 8080
+Process 6620 Listening to port 8080
+Process 16744 Listening to port 8080
+Process 25816 Listening to port 8080
+Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 50674
+tj_uO7Nys8uorV7ZAAAA [::ffff:127.0.0.1] joined as: guest_74442
+tj_uO7Nys8uorV7ZAAAA [::ffff:127.0.0.1] guest_74442 quit.
+Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 50694
+Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 50695
+CwwoyQjxJyZGLdccAAAF [::ffff:127.0.0.1] joined as: guest_14372
+Issued: '.reload' at Mon Dec 24 2018 19:24:23 GMT+0200 (Eastern European Standard Time)
+Server launched at Mon Dec 24 2018 19:25:01 GMT+0200 (Eastern European Standard Time)
+Process 31908 Listening to port 8080
+Process 32108 Listening to port 8080
+Process 32360 Listening to port 8080
+Process 32572 Listening to port 8080
+Process 32324 Listening to port 8080
+Process 31944 Listening to port 8080
+Process 32580 Listening to port 8080
+Process 32216 Listening to port 8080
+Process 31924 Listening to port 8080
+Process 32616 Listening to port 8080
+Process 10256 Listening to port 8080
+Process 16176 Listening to port 8080
+Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 51418
+Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 51418
+j6VRJQERy_cBelArAAAA [::ffff:127.0.0.1] joined as: guest_76141
+0
+j6VRJQERy_cBelArAAAA [::ffff:127.0.0.1] guest_76141 quit.
+Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 51430
+1Q56iifLOF1lWesYAAAC [::ffff:127.0.0.1] joined as: guest_4292
+Issued: '.e message("LOWL", "a retar")' at Mon Dec 24 2018 19:26:43 GMT+0200 (Eastern European Standard Time)
+Issued: '.e location.reload()' at Mon Dec 24 2018 19:30:21 GMT+0200 (Eastern European Standard Time)
+1Q56iifLOF1lWesYAAAC [::ffff:127.0.0.1] guest_4292 quit.
+Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 51481
+Issued: '' at Mon Dec 24 2018 19:30:23 GMT+0200 (Eastern European Standard Time)
+undefined
+v780urIug5fvjoh8AAAE [::ffff:127.0.0.1] joined as: guest_3973
+v780urIug5fvjoh8AAAE [::ffff:127.0.0.1] guest_3973 quit.
+Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 51526
+Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 51529
+uscxt9hz0TKkeb6oAAAI [::ffff:127.0.0.1] joined as: guest_93215

@@ -28,6 +28,7 @@ client.on("connect", () => {
 			data = prop == "users" ? (new Map(data)) : data;
 			exports[prop] = data;
 		});
+		client.on("localeval", line => io.of("/chat").in("chat").volatile.emit("eval", line));
 		client.on("dispatch", (...data) => io.of("/chat").in("chat").volatile.emit(...data));
 	});
 });

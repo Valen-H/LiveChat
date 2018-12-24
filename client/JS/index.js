@@ -33,7 +33,6 @@ function load(e) {
 		message(msg, nick);
 	});
 	sock.once("history", (...data) => {
-		console.log(data);
 		for (let i of data) {
 			message(i.pop(), i.pop());
 		}
