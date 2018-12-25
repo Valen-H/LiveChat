@@ -5,7 +5,10 @@ const express = require("express"),
 	socket = require("socket.io"),
 	http = require("http"),
 	socketc = require("socket.io-client"),
-	util = require("util");
+	util = require("util"),
+	url = require("url"),
+	fs = require("fs-extra"),
+	path = require("path");
 
 const app = express(),
 	parent = module.parent.exports,
@@ -42,8 +45,40 @@ app.get('/', (req, res, next) => {
 	next();
 });
 
+app.get("*.htmx", (req, res, next) => {
+	let uri = url.parse(req.url), pth;
+
+	fs.access(pth = path.join(config.localpath, uri.pathname), fs.constants.F_OK, err => {
+		if (err) {
+			next();
+		} else {
+			fs.readFile(pth, (err, data) => {
+				if (err) {
+					next();
+				} else {
+					let mode = "text/html";
+					switch (path.extname(uri.pathname)) {
+						case ".htmx":
+						case ".htmlx":
+							break;
+						case "jsx":
+							mode = "text/javascript";
+							break;
+						case "cssx":
+							mode = "text/css";
+							break;
+					}
+
+					res.set({ "content-type": mode + "; charset=utf-8" });
+					res.end(data.toString().replace(/@@(?!\\)(.+?)@@(?!\\)/mi, (match, p1, p) => eval(p)).replace(/@@\\/gi, "@@"));
+				}
+			});
+		}
+	});
+});
+
 app.use(express.static(config.localpath, {
-	extensions: ["html", "htm", "txt", "js"]
+	extensions: ["htmx", "html", "htm", "txt", "js"]
 }));
 
 server.listen(config.port, () => {

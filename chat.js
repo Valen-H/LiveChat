@@ -165,23 +165,23 @@ if (cluster.isMaster) {
 		console.info("Command not Found");
 	});
 
-	exports.watchersrc = fs.watch(path.join(__dirname, "src"), {
+	!process.env.BLOCKRELOAD && (exports.watchersrc = fs.watch(path.join(__dirname, "src"), {
 		persistent: false
 	}, (evt, file) => {
 		if (file.endsWith(".js")) {
 			exports.rlline(".reload");
 		}
-	});
+	}));
 
-	exports.watcherroot = fs.watch("./", {
+	!process.env.BLOCKRELOAD && (exports.watcherroot = fs.watch("./", {
 		persistent: false
 	}, (evt, file) => {
 		if (file.endsWith(".js")) {
 			exports.rlline(".reload");
 		}
-	});
+	}));
 
-	syscall("npm run build");
+	!process.env.BLOCKBUILD && syscall("npm run build");
 	
 	process.once("exit", code => {
 		console.info(chalk.cyan(code));

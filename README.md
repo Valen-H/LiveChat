@@ -25,9 +25,13 @@ There are several in-chat commands too:
 > Current chat prefix is `!!`  
   
 ## Other Features  
-When the server main files are changed, the server automatically reloads unless the environmental variable BLOCKRELOAD is passed,  
+* When the server main files are changed, the server automatically reloads unless the environmental variable BLOCKRELOAD is passed,  
 Similarily, when `client/JS` files are edited they get converted to ES5 and served under `client/JS5`, they get minified and Flow-compiled aswell,  
 Block the automatic rebuild with the BLOCKBUILD environmental variable.  
-The default serving path can be changed from `./client` to a custom one through `config.json`  
-You can force `babel` compilation with `npm run build` but this requires the package to be installed as `--save-dev` and default standards to be followed.  
-The server works with the Node-builtin `cluster` module and communicates with each shard with an `ipc` socket (not redis!)  
+* The default serving path can be changed from `./client` to a custom one through `config.json`  
+* You can force `babel` compilation with `npm run build` but this requires the package to be installed as `--save-dev` and default standards to be followed.  
+* The server works with the Node-builtin `cluster` module and communicates with each shard with an `ipc` socket (not redis!)  
+* The server auto-restarts on fatal/syntax errors and abnormal quits and catches globally unhandled errors.  
+* Serving the special `.htmx`/`.htmlx`/`.jsx`/`.cssx` files leads to the translation of `@@\expression@@\` expressions in them before serving. Appending a `\` (escape sequence) after the `@@` escapes the whole expression from being evaluated (like this example).  
+> Note that these evaluations happen server-side!!  
+* The history of the last 50 messages posted is kept but discarded upon server restart. The max history size can be adjusted from the `config.json` file together with the passwords.  

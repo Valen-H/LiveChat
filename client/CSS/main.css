@@ -19,6 +19,7 @@
 	height: 70%;
 	overflow: auto;
 	word-break: break-all;
+	margin: 2px;
 }
 
 #txtarea {
