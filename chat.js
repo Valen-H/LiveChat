@@ -2,6 +2,15 @@
  * ADD MULTIPLE ROOMS, PROFILES AND BANS/REQUEST-TIMEOUT, MESSAGE HISTORY
  */
 
+/** ROOM THEORY
+ * EXPOSES A VISIBLE ROOM LIST
+ * BUTTONS: MAKE ROOM, JOIN ROOM
+ * MAKING ROOM ALLOWS SETTING PASSWORD AND VISIBILITY OF NEW ROOM
+ * JOINING ROOM REQUIRES PASSWORD ONCE UNLESS PASSWORD CHANGES AFTER FIRST AUTH
+ * USR... -> USER-PRIVATE CHANNELS
+ * CHAT -> GLOBAL CHAT (LOBBY)
+ */
+
 
 //FIRST-EXPANSION
 
@@ -53,7 +62,7 @@ console.error = function error(...args) {
 
 let commands = exports.commands = {
 	exit: new classes.Command('^' + config.prefix + "e(xit)?$", () => {
-		exports.logs.write("Shutting Down... " + Date());
+		exports.log.write("Shutting Down... " + Date());
 		process.exit();
 		return true;
 	}),
@@ -143,8 +152,7 @@ if (cluster.isMaster) {
 		input: process.stdin,
 		output: process.stdout
 	});
-	exports.compiling = false;
-
+	
 	rl.on("line", exports.rlline = line => {
 		exports.log.write(`Issued: '${line}' at ${Date()}\n`);
 
@@ -157,17 +165,6 @@ if (cluster.isMaster) {
 		console.info("Command not Found");
 	});
 
-	exports.watcherroot = fs.watch(__dirname, {
-		persistent: false
-	}, (evt, file) => {
-		if (file.startsWith("babel") && !exports.compiling) {
-			syscall("npm run build").once("close", () => exports.compiling = false);
-			exports.compiling = true;
-		} else if (file.endsWith(".js")) {
-			exports.rlline(".reload");
-		}
-	});
-
 	exports.watchersrc = fs.watch(path.join(__dirname, "src"), {
 		persistent: false
 	}, (evt, file) => {
@@ -176,16 +173,16 @@ if (cluster.isMaster) {
 		}
 	});
 
-	exports.watcherclient = fs.watch(config.localpath, {
-		persistent: false,
-		recursive: true
+	exports.watcherroot = fs.watch("./", {
+		persistent: false
 	}, (evt, file) => {
-		if (file.startsWith("JS" + path.sep) && file.endsWith(".js") && !exports.compiling) {
-			syscall("npm run build").once("close", () => exports.compiling = false);
-			exports.compiling = true;
+		if (file.endsWith(".js")) {
+			exports.rlline(".reload");
 		}
-		});
+	});
 
+	syscall("npm run build");
+	
 	process.once("exit", code => {
 		console.info(chalk.cyan(code));
 		exports.log.write("Master exited at '" + Date() + `' with ${code}\n`);

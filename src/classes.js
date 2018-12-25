@@ -15,4 +15,10 @@ class Command {
 	} //test
 } //Command
 
+class User {
+	constructor(name, sesId) {
+
+	} //ctor
+} //User
+
 exports.Command = Command;

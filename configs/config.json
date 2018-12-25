@@ -2,6 +2,7 @@
 	"port": 8080,
 	"ipcPort": 9090,
 	"ipcPass": "ipcPasss",
+	"adminPass": "adminPasss",
 	"localpath": "./client",
 	"prefix": "\\.",
 	"logfile": "livechat.log",

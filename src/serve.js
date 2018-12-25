@@ -51,10 +51,10 @@ server.listen(config.port, () => {
 });
 
 io.of("/chat").on("connection", sock => {
-	sock.on("auth", nick => {
+	sock.once("auth", nick => {
 		sock.nick = nick;
 		if (Array.from(exports.users.values()).includes(nick) || !/^[a-zA-Z0-9_\-();' ]+$/i.test(nick)) {
-			sock.emit("disallow", "Username is Taken.");
+			sock.emit("disallow", "Username is Taken/Invalid.");
 			sock.disconnect(true);
 		} else {
 			sock.join("CHAT");
@@ -67,12 +67,20 @@ io.of("/chat").on("connection", sock => {
 			client.emit("dispatch", "message", `User '<u>${nick}</u>' has <font style='color: green;'>joined</font> the chat! <small>${Date()}</small>`, "<b>SYSTEM</b>");
 			sock.emit("allow");
 			console.log(chalk`{yellow.dim.italic ${sock.conn.id}} [${sock.conn.remoteAddress}] joined as: {yellow.dim.bold ${nick}}`);
-			sock.on("message", msg => {
+			sock.on("message", msg => {  //BRUTEFORCE_EXPOSED
 				client.emit("addmsg", {
 					msg: sanitize(msg),
 					user: sanitize(nick)
 				});
 				client.emit("dispatch", "message", sanitize(msg), sanitize(nick));
+			});
+			sock.once("imAdmin", pass => {  //BRUTEFORCE_EXPOSED
+				if (config.adminPass == pass.trim()) {
+					sock.join("admin");
+					console.log(chalk`{underline {yellow.dim.italic ${sock.conn.id}} [${sock.conn.remoteAddress}] ${nick} WAS GRANTED ADMINISTRATION RIGHTS!} {gray ${Date()}}`);
+				} else {
+					console.log(chalk`{underline {yellow.dim.italic ${sock.conn.id}} [${sock.conn.remoteAddress}] ${nick} TRIED TO GET ADMINISTRATION RIGHTS WITH PASS: ${pass}} {gray ${Date()}}`);
+				}
 			});
 			sock.once("disconnect", () => {
 				client.emit("rmuser", sock.conn.id);

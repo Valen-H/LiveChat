@@ -3,15 +3,19 @@
   "version": "0.0.1",
   "description": "A live chat web page.",
   "main": "chat.js",
-  "scripts": {
-    "test": "cd test ; node index.js",
-    "start": "node chat.js || npm start",
-    "build": "npx babel client/JS/ -d client/JS5/"
+	"scripts": {
+		"test": "cd test ; node index.js",
+		"start": "node chat.js || npm start",
+		"build": "npx babel client/JS/ -d client/JS5/ -w --source-maps inline --ignore client/JS/polyfill.min.js",
+		"xpose": "showdown makehtml -i README.md -o client/readme.htm"
+	},
+  "bin": {
+    "livechat": "./chat.js"
   },
   "keywords": [
     "browser",
     "sockets",
-    "CHAT",
+    "chat",
     "react",
     "express"
   ],
@@ -30,11 +34,8 @@
     "@babel/cli": "^7.2.3",
     "@babel/core": "^7.2.2",
     "@babel/preset-env": "^7.2.3",
+    "@babel/preset-flow": "^7.0.0",
     "@babel/preset-react": "^7.0.0",
-    "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.3",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-es2015": "^6.24.1",
     "babel-preset-minify": "^0.5.0"
   }
 }

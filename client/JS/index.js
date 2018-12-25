@@ -1,26 +1,35 @@
-﻿let text = {
+﻿"use strict";
+
+let text: object = {
 	shift: false,
 	area: null,
 	send: null
 },
 	scroll = 100;
 
-const prefix = "!!";
+const prefix: string = "!!";
 
 window.nick = getCookie("user") || "guest_" + Math.round(Math.random() * 1e5);
 
 while (!(nick = prompt("Insert a Nickname:", nick || getCookie("user"))) || !/^[a-zA-Z0-9_\-();' ]+$/i.test(nick)) { }
 
-function send(msg = text.send.value) {
-	if (msg.startsWith(prefix)) {
-		return;
+function drop(line: number, t: number = 1): string {
+	line = line.split(' ');
+	while (t--) {
+		line.shift();
 	}
-	msg = msg.trim();
-	sendMessage(msg);
-	text.send.value = '';
-} //send
+	return line.join(' ');
+} //drop
 
-function load(e) {
+function dropGet(line: number, t: number = 0): string {
+	line = line.split(' ');
+	while (t--) {
+		line.shift();
+	}
+	return line.shift();
+} //dropGet
+
+function load(e?: object): void {
 	console.log("Index loaded");
 
 	text.area = document.getElementById("msgarea");
@@ -28,46 +37,54 @@ function load(e) {
 
 	auth(nick);
 	setCookie("user", nick);
+	parseQueries();
 	
-	sock.on("message", (msg, nick) => {
+	sock.on("message", (msg: string, nick: string): void => {
 		message(msg, nick);
 	});
-	sock.once("history", (...data) => {
+	sock.once("history", (...data: string[]): void => {
 		for (let i of data) {
 			message(i.pop(), i.pop());
 		}
 	});
-	sock.once("connect", () => {
+	sock.once("connect", (): void => {
 		text.area.innerHTML = '';
-		message("This is a Beta version of a chatting service, upcoming features are: profile picture support, message history view, spam defense, multiple chatrooms and more security!", "<b>SYSTEM</b>");
+		message("This is a Beta version of a chatting service, upcoming features are: profile picture support, message history view, spam defense, multiple chatrooms and more security!", "<font color='red'><b>SYSTEM</b></font>");
 		message("<u>Please be kind and don't spam, we have means of banning aggitators.</u>", "<font color='red'><b>SYSTEM</b></font>");
 		console.info("The prefix is !!, type !!help in chat for commands.");
 	});
 } //load
 
-function sendMessage(msg) {
+function send(msg: string = text.send.value): void {
+	text.send.value = '';
+	if (msg.startsWith(prefix)) {
+		return command(msg);
+	}
+	msg = msg.trim();
+	sendMessage(msg);
+} //send
+
+function sendMessage(msg: string): void {
 	if (!msg) {
 		message("<font color='red'><b>You cannot send an empty message!</b></font>", "<font color='red'><b>SYSTEM</b></font>");
-	} else if (sock.connected && !sock.disconnected) {
+	} else if (conn) {
 		sock.send(msg);
 	} else {
 		message("<font color='red'><b>You cannot send messages while disconnected!</b></font>", "<font color='red'><b>SYSTEM</b></font>");
 	}
 } //sendMessage
 
-function message(msg, user) {
+function message(msg: string, user: string): void {
 	let p = document.createElement("p");
 	p.innerHTML = `<b>${user}:</b> ${msg}<br />`;
 	
 	text.area.appendChild(p);
-	text.area.scrollHeight += scroll;
 	if (text.area.scrollBy) {
 		text.area.scrollBy(0, scroll);
 	}
 } //message
-window.message = message;
 
-function shiftcheck(event, down = true) {
+function shiftcheck(event: object, down: boolean = true): void {
 	if (event.key == "Shift") {
 		text.shift = down;
 	}
@@ -76,14 +93,14 @@ function shiftcheck(event, down = true) {
 	}
 } //shiftcheck
 
-function submit(event) {
+function submit(e?: object): void {
 	text.shift = false;
 	shiftcheck({
 		key: "Enter"
 	}, false);
 } //submit
 
-function sanitize(msg) {
+function sanitize(msg: string): string {
 	msg = msg.replace(/&/gmi, "&amp;")
 		.replace(/</gmi, "&lt;")
 		.replace(/>/gmi, "&gt;")
@@ -92,23 +109,31 @@ function sanitize(msg) {
 	return msg;
 } //sanitize
 
-function parseCookies(cookies = document.cookie) {
-	return new Map(document.cookie.split(';').map(c => c.split('=')));
+function parseCookies(cookies: string = document.cookie): Map {
+	return new Map(cookies.split(';').map(c => c.split('=')));
 } //parseCookies
 
-function storeCookies(map) {
+function storeCookies(map: Map): string {
 	return document.cookie = Array.from(map).map(a => a.join('=')).join(';');
 } //storeCookies
 
-function setCookie(key, value) {
+function setCookie(key: string, value: string): string {
 	let tmp = parseCookies();
 	tmp.set(key, value);
 	return storeCookies(tmp);
 } //setCookie
 
-function getCookie(key) {
-	let tmp = parseCookies();
+function getCookie(key: string): string {
+	let tmp: Map = parseCookies();
 	return tmp.get(key);
 } //getCookie
+
+function parseQueries(loc: string = location.href) {
+	let out = loc.split('?').pop().replace(/#.*?$/, '').split('&').map(q => q.split('='));
+
+	for (let i of out) {
+		window[i.shift()] = i.pop();
+	}
+} //parseQueries
 
 window.addEventListener("DOMContentLoaded", load);

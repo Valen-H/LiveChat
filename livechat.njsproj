@@ -41,6 +41,9 @@
     </Compile>
     <Compile Include="client\JS5\index.js" />
     <Compile Include="client\JS5\polyfill.min.js" />
+    <Compile Include="client\JS\commands.js">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="client\JS\index.js">
       <SubType>Code</SubType>
     </Compile>
