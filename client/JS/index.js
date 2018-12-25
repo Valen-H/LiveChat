@@ -9,7 +9,7 @@ const prefix = "!!";
 
 window.nick = getCookie("user") || "guest_" + Math.round(Math.random() * 1e5);
 
-while (!(nick = prompt("Insert a Nickname:", nick || getCookie("user"))) || !/^[a-zA-Z0-9_\-()]+$/i.test(nick)) { }
+while (!(nick = prompt("Insert a Nickname:", nick || getCookie("user"))) || !/^[a-zA-Z0-9_\-();' ]+$/i.test(nick)) { }
 
 function send(msg = text.send.value) {
 	if (msg.startsWith(prefix)) {
@@ -40,18 +40,18 @@ function load(e) {
 	sock.once("connect", () => {
 		text.area.innerHTML = '';
 		message("This is a Beta version of a chatting service, upcoming features are: profile picture support, message history view, spam defense, multiple chatrooms and more security!", "<b>SYSTEM</b>");
-		message("<u>Please be kind and don't spam, we have means of banning aggitators.</u>", "<b>SYSTEM</b>");
+		message("<u>Please be kind and don't spam, we have means of banning aggitators.</u>", "<font color='red'><b>SYSTEM</b></font>");
 		console.info("The prefix is !!, type !!help in chat for commands.");
 	});
 } //load
 
 function sendMessage(msg) {
 	if (!msg) {
-		message("<font style='color: red'><b>You cannot send an empty message!</b></font>", "<b>SYSTEM</b>");
+		message("<font color='red'><b>You cannot send an empty message!</b></font>", "<font color='red'><b>SYSTEM</b></font>");
 	} else if (sock.connected && !sock.disconnected) {
 		sock.send(msg);
 	} else {
-		message("<font style='color: red'><b>You cannot send messages while disconnected!</b></font>", "<b>SYSTEM</b>");
+		message("<font color='red'><b>You cannot send messages while disconnected!</b></font>", "<font color='red'><b>SYSTEM</b></font>");
 	}
 } //sendMessage
 

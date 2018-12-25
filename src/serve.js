@@ -28,8 +28,9 @@ client.on("connect", () => {
 			data = prop == "users" ? (new Map(data)) : data;
 			exports[prop] = data;
 		});
-		client.on("localeval", line => io.of("/chat").in("chat").volatile.emit("eval", line));
-		client.on("dispatch", (...data) => io.of("/chat").in("chat").volatile.emit(...data));
+		client.on("localeval", line => io.of("/chat").in("CHAT").volatile.emit("eval", line));
+		client.on("dispatch", (...data) => io.of("/chat").in("CHAT").volatile.emit(...data));
+		client.on("dispatchTo", (usr, ...data) => io.of("/chat").in("USR" + usr).volatile.emit(...data));
 	});
 });
 
@@ -52,11 +53,12 @@ server.listen(config.port, () => {
 io.of("/chat").on("connection", sock => {
 	sock.on("auth", nick => {
 		sock.nick = nick;
-		if (Array.from(exports.users.values()).includes(nick)) {
+		if (Array.from(exports.users.values()).includes(nick) || !/^[a-zA-Z0-9_\-();' ]+$/i.test(nick)) {
 			sock.emit("disallow", "Username is Taken.");
 			sock.disconnect(true);
 		} else {
-			sock.join("chat");
+			sock.join("CHAT");
+			sock.join("USR" + nick);
 			client.emit("adduser", {
 				id: sock.conn.id,
 				nick: nick

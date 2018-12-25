@@ -38,7 +38,7 @@
 		location.reload();
 	});
 	sock.on("disconnect", () => {
-		message("<font style='color: red'><b>You have been disconnected. Attempting reconnect...</font></b>", "<b>SYSTEM</b>");
+		message("<font color='red'><b>You have been disconnected. Attempting reconnect...</font></b>", "<font color='red'><b>SYSTEM</b></font>");
 		sock.open();
 		conn = false;
 		setTimeout(() => {
@@ -46,13 +46,13 @@
 				alert("Could not reconnect. Refreshing...");
 				location.reload();
 			} else {
-				message("<font style='color: green'><b>Connected.</font></b>", "<b>SYSTEM</b>");
+				message("<font style='color: green'><b>Connected.</font></b>", "<font color='red'><b>SYSTEM</b></font>");
 			}
 		}, 5000);
 	});
-	sock.on("reconnecting", () => message("<font style='color: red'><b>Reconnecting...</font></b>", "<b>SYSTEM</b>"));
+	sock.on("reconnecting", () => message("<font color='red'><b>Reconnecting...</font></b>", "<font color='red'><b>SYSTEM</b></font>"));
 	sock.on("reconnect", () => {
-		message("<font style='color: green'><b>Reconnected.</font></b>", "<b>SYSTEM</b>");
+		message("<font style='color: green'><b>Reconnected.</font></b>", "<font color='red'><b>SYSTEM</b></font>");
 		conn = true;
 	});
 	sock.once("reconnect_error", () => {

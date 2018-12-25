@@ -2878,3 +2878,344 @@ v780urIug5fvjoh8AAAE [::ffff:127.0.0.1] guest_3973 quit.
 Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 51526
 Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 51529
 uscxt9hz0TKkeb6oAAAI [::ffff:127.0.0.1] joined as: guest_93215
+uscxt9hz0TKkeb6oAAAI [::ffff:127.0.0.1] guest_93215 quit.
+Received GET / 1.1 by IPv6 ::1 52302
+Received GET / 1.1 by IPv6 ::1 52302
+XTS3P5LltHQme5chAAAe [::1] joined as: guest_2242
+XTS3P5LltHQme5chAAAe [::1] guest_2242 quit.
+Issued: '.e' at Mon Dec 24 2018 21:53:01 GMT+0200 (Eastern European Standard Time)
+Server launched at Tue Dec 25 2018 11:42:50 GMT+0200 (Eastern European Standard Time)
+Process 29556 Listening to port 8080
+Process 11172 Listening to port 8080
+Process 31224 Listening to port 8080
+Process 15336 Listening to port 8080
+Process 33772 Listening to port 8080
+Process 26948 Listening to port 8080
+Process 22084 Listening to port 8080
+Process 19580 Listening to port 8080
+Process 20496 Listening to port 8080
+Process 26172 Listening to port 8080
+Process 24440 Listening to port 8080
+Process 1656 Listening to port 8080
+Received GET / 1.1 by IPv6 ::1 53617
+a_XGKBH6FNzJjZSdAAAA [::1] joined as: guest_38119
+Received GET / 1.1 by IPv6 ::1 53679
+dNM979R0bwU_GhkRAAAB [::1] joined as: guest_11891
+dETXNvPJaIBjONkUAAAB [::1] joined as: guest_44045
+dNM979R0bwU_GhkRAAAB [::1] guest_11891 quit.
+Received GET / 1.1 by IPv6 ::1 54084
+ciBL-N4GW3RFCBz7AAAC [::1] joined as: guest_68534
+Issued: '.reload' at Tue Dec 25 2018 11:51:52 GMT+0200 (Eastern European Standard Time)
+Server launched at Tue Dec 25 2018 11:51:57 GMT+0200 (Eastern European Standard Time)
+Process 32076 Listening to port 8080
+Process 24200 Listening to port 8080
+Process 7796 Listening to port 8080
+Process 29000 Listening to port 8080
+Process 31108 Listening to port 8080
+Process 20004 Listening to port 8080
+Process 35532 Listening to port 8080
+Process 21308 Listening to port 8080
+Process 35728 Listening to port 8080
+Process 25912 Listening to port 8080
+Process 3940 Listening to port 8080
+Process 12716 Listening to port 8080
+Received GET / 1.1 by IPv6 ::1 54652
+SDztPdysuXUKKDgrAAAB [::1] joined as: guest_58524
+Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 54742
+D0IOn_sYVGlu8pY5AAAD [::ffff:127.0.0.1] joined as: guest_33944
+Received GET / 1.1 by IPv6 ::1 54753
+8UBsevI2aQIczR_JAAAE [::1] joined as: guest_31868
+Issued: '.rel' at Tue Dec 25 2018 11:52:20 GMT+0200 (Eastern European Standard Time)
+Server launched at Tue Dec 25 2018 11:52:21 GMT+0200 (Eastern European Standard Time)
+Process 9912 Listening to port 8080
+Process 28296 Listening to port 8080
+Process 35252 Listening to port 8080
+Process 2924 Listening to port 8080
+Process 28268 Listening to port 8080
+Process 32780 Listening to port 8080
+Process 28348 Listening to port 8080
+Process 7812 Listening to port 8080
+Process 31948 Listening to port 8080
+Process 33408 Listening to port 8080
+Process 27896 Listening to port 8080
+Process 22392 Listening to port 8080
+Received GET / 1.1 by IPv6 ::1 54825
+jDqnPAFnhd9BrdRgAAAD [::1] joined as: guest_18480
+Received GET / 1.1 by IPv6 ::1 54890
+mKh_3_xD4Hu0hLhHAAAH [::1] joined as: guest_31937
+mKh_3_xD4Hu0hLhHAAAH [::1] guest_31937 quit.
+Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 54902
+3DVpM5YvnxqP2PfAAAAL [::ffff:127.0.0.1] joined as: guest_85626
+Received GET / 1.1 by IPv6 ::1 54915
+Received GET / 1.1 by IPv6 ::1 54915
+pAO2-auJYenZse5XAAAM [::1] joined as: guest_58530
+Issued: '.ref' at Tue Dec 25 2018 11:52:42 GMT+0200 (Eastern European Standard Time)
+pAO2-auJYenZse5XAAAM [::1] guest_58530 quit.
+3DVpM5YvnxqP2PfAAAAL [::ffff:127.0.0.1] guest_85626 quit.
+Received GET / 1.1 by IPv6 ::1 54796
+{ SyntaxError: Unexpected token .
+    at Command.exports.commands.eval.classes.Command.line [as exec] (C:\Users\CodeDragon\Desktop\workspace\Node\livechat\chat.js:89:81)
+    at Command.test (C:\Users\CodeDragon\Desktop\workspace\Node\livechat\src\classes.js:11:16)
+    at Interface.rl.on.exports.rlline.line (C:\Users\CodeDragon\Desktop\workspace\Node\livechat\chat.js:136:20)
+    at Interface.emit (events.js:182:13)
+    at Interface._onLine (readline.js:301:10)
+    at Interface._line (readline.js:673:8)
+    at Interface._ttyWrite (readline.js:952:14)
+    at ReadStream.onkeypress (readline.js:178:10)
+    at ReadStream.emit (events.js:182:13)
+    at emitKeys (internal/readline.js:424:14)
+  [message]: 'Unexpected token .',
+  [stack]:
+   'SyntaxError: Unexpected token .\n    at Command.exports.commands.eval.classes.Command.line [as exec] (C:\\Users\\CodeDragon\\Desktop\\workspace\\Node\\livechat\\chat.js:89:81)\n    at Command.test (C:\\Users\\CodeDragon\\Desktop\\workspace\\Node\\livechat\\src\\classes.js:11:16)\n    at Interface.rl.on.exports.rlline.line (C:\\Users\\CodeDragon\\Desktop\\workspace\\Node\\livechat\\chat.js:136:20)\n    at Interface.emit (events.js:182:13)\n    at Interface._onLine (readline.js:301:10)\n    at Interface._line (readline.js:673:8)\n    at Interface._ttyWrite (readline.js:952:14)\n    at ReadStream.onkeypress (readline.js:178:10)\n    at ReadStream.emit (events.js:182:13)\n    at emitKeys (internal/readline.js:424:14)' }
+jDqnPAFnhd9BrdRgAAAD [::1] guest_18480 quit.
+Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 54938
+Received GET / 1.1 by IPv6 ::1 54936
+_q8Cy2FtkZAjT45GAAAB [::1] joined as: guest_77105
+g8RhlzP_Zv9YkbAFAAAC [::1] joined as: guest_36160
+jW44SiSblBm23BEIAAAO [::ffff:127.0.0.1] joined as: guest_77519
+_q8Cy2FtkZAjT45GAAAB [::1] guest_77105 quit.
+g8RhlzP_Zv9YkbAFAAAC [::1] guest_36160 quit.
+Received GET / 1.1 by IPv6 ::1 54997
+haq3rMZR8Czcab-qAAAR [::1] joined as: guest_23977
+Received GET / 1.1 by IPv6 ::1 55094
+Received GET / 1.1 by IPv6 ::1 55094
+Ski_74bk0xjA6a7GAAAY [::1] joined as: guest_87041
+Issued: '.ref guest_87041' at Tue Dec 25 2018 11:54:26 GMT+0200 (Eastern European Standard Time)
+{ SyntaxError: Unexpected token .
+    at Command.exports.commands.eval.classes.Command.line [as exec] (C:\Users\CodeDragon\Desktop\workspace\Node\livechat\chat.js:89:81)
+    at Command.test (C:\Users\CodeDragon\Desktop\workspace\Node\livechat\src\classes.js:11:16)
+    at Interface.rl.on.exports.rlline.line (C:\Users\CodeDragon\Desktop\workspace\Node\livechat\chat.js:136:20)
+    at Interface.emit (events.js:182:13)
+    at Interface._onLine (readline.js:301:10)
+    at Interface._line (readline.js:673:8)
+    at Interface._ttyWrite (readline.js:952:14)
+    at ReadStream.onkeypress (readline.js:178:10)
+    at ReadStream.emit (events.js:182:13)
+    at emitKeys (internal/readline.js:424:14)
+  [message]: 'Unexpected token .',
+  [stack]:
+   'SyntaxError: Unexpected token .\n    at Command.exports.commands.eval.classes.Command.line [as exec] (C:\\Users\\CodeDragon\\Desktop\\workspace\\Node\\livechat\\chat.js:89:81)\n    at Command.test (C:\\Users\\CodeDragon\\Desktop\\workspace\\Node\\livechat\\src\\classes.js:11:16)\n    at Interface.rl.on.exports.rlline.line (C:\\Users\\CodeDragon\\Desktop\\workspace\\Node\\livechat\\chat.js:136:20)\n    at Interface.emit (events.js:182:13)\n    at Interface._onLine (readline.js:301:10)\n    at Interface._line (readline.js:673:8)\n    at Interface._ttyWrite (readline.js:952:14)\n    at ReadStream.onkeypress (readline.js:178:10)\n    at ReadStream.emit (events.js:182:13)\n    at emitKeys (internal/readline.js:424:14)' }
+Issued: '.reload' at Tue Dec 25 2018 11:54:44 GMT+0200 (Eastern European Standard Time)
+Server launched at Tue Dec 25 2018 11:54:45 GMT+0200 (Eastern European Standard Time)
+Process 21756 Listening to port 8080
+Process 34824 Listening to port 8080
+Process 20304 Listening to port 8080
+Process 8240 Listening to port 8080
+Process 30312 Listening to port 8080
+Process 15844 Listening to port 8080
+Process 12848 Listening to port 8080
+Process 15556 Listening to port 8080
+Process 21588 Listening to port 8080
+Process 34260 Listening to port 8080
+Process 23012 Listening to port 8080
+Process 16328 Listening to port 8080
+Received GET / 1.1 by IPv6 ::1 55202
+DojqbnfhFa4rLzPrAAAB [::1] joined as: guest_39122
+Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 55274
+GmhtJ6Xu9EDkZACGAAAD [::ffff:127.0.0.1] joined as: guest_36016
+Received GET / 1.1 by IPv6 ::1 55287
+LF2rsg-MYhEz3h4DAAAC [::1] joined as: guest_48579
+LF2rsg-MYhEz3h4DAAAC [::1] guest_48579 quit.
+Issued: '.ref guest_48579' at Tue Dec 25 2018 11:55:14 GMT+0200 (Eastern European Standard Time)
+{ SyntaxError: Unexpected token .
+    at Command.exports.commands.eval.classes.Command.line [as exec] (C:\Users\CodeDragon\Desktop\workspace\Node\livechat\chat.js:89:81)
+    at Command.test (C:\Users\CodeDragon\Desktop\workspace\Node\livechat\src\classes.js:11:16)
+    at Interface.rl.on.exports.rlline.line (C:\Users\CodeDragon\Desktop\workspace\Node\livechat\chat.js:136:20)
+    at Interface.emit (events.js:182:13)
+    at Interface._onLine (readline.js:301:10)
+    at Interface._line (readline.js:673:8)
+    at Interface._ttyWrite (readline.js:952:14)
+    at ReadStream.onkeypress (readline.js:178:10)
+    at ReadStream.emit (events.js:182:13)
+    at emitKeys (internal/readline.js:424:14)
+  [message]: 'Unexpected token .',
+  [stack]:
+   'SyntaxError: Unexpected token .\n    at Command.exports.commands.eval.classes.Command.line [as exec] (C:\\Users\\CodeDragon\\Desktop\\workspace\\Node\\livechat\\chat.js:89:81)\n    at Command.test (C:\\Users\\CodeDragon\\Desktop\\workspace\\Node\\livechat\\src\\classes.js:11:16)\n    at Interface.rl.on.exports.rlline.line (C:\\Users\\CodeDragon\\Desktop\\workspace\\Node\\livechat\\chat.js:136:20)\n    at Interface.emit (events.js:182:13)\n    at Interface._onLine (readline.js:301:10)\n    at Interface._line (readline.js:673:8)\n    at Interface._ttyWrite (readline.js:952:14)\n    at ReadStream.onkeypress (readline.js:178:10)\n    at ReadStream.emit (events.js:182:13)\n    at emitKeys (internal/readline.js:424:14)' }
+Received GET / 1.1 by IPv6 ::1 55330
+zj5nBawRxq_t81CYAAAF [::1] joined as: guest_95147
+zj5nBawRxq_t81CYAAAF [::1] guest_95147 quit.
+Issued: '56' at Tue Dec 25 2018 11:58:09 GMT+0200 (Eastern European Standard Time)
+56
+Received GET / 1.1 by IPv6 ::1 55610
+nbfKraes29ojbkyMAAAG [::1] joined as: guest_56075
+nbfKraes29ojbkyMAAAG [::1] guest_56075 quit.
+Received GET / 1.1 by IPv6 ::1 55666
+ssuKkw1bNJ4NZnZNAAAF [::1] joined as: guest_81078
+Issued: '.ref guest_36016' at Tue Dec 25 2018 11:59:17 GMT+0200 (Eastern European Standard Time)
+{ SyntaxError: Unexpected token .
+    at Command.exports.commands.eval.classes.Command.line [as exec] (C:\Users\CodeDragon\Desktop\workspace\Node\livechat\chat.js:89:81)
+    at Command.test (C:\Users\CodeDragon\Desktop\workspace\Node\livechat\src\classes.js:11:16)
+    at Interface.rl.on.exports.rlline.line (C:\Users\CodeDragon\Desktop\workspace\Node\livechat\chat.js:136:20)
+    at Interface.emit (events.js:182:13)
+    at Interface._onLine (readline.js:301:10)
+    at Interface._line (readline.js:673:8)
+    at Interface._ttyWrite (readline.js:952:14)
+    at ReadStream.onkeypress (readline.js:178:10)
+    at ReadStream.emit (events.js:182:13)
+    at emitKeys (internal/readline.js:424:14)
+  [message]: 'Unexpected token .',
+  [stack]:
+   'SyntaxError: Unexpected token .\n    at Command.exports.commands.eval.classes.Command.line [as exec] (C:\\Users\\CodeDragon\\Desktop\\workspace\\Node\\livechat\\chat.js:89:81)\n    at Command.test (C:\\Users\\CodeDragon\\Desktop\\workspace\\Node\\livechat\\src\\classes.js:11:16)\n    at Interface.rl.on.exports.rlline.line (C:\\Users\\CodeDragon\\Desktop\\workspace\\Node\\livechat\\chat.js:136:20)\n    at Interface.emit (events.js:182:13)\n    at Interface._onLine (readline.js:301:10)\n    at Interface._line (readline.js:673:8)\n    at Interface._ttyWrite (readline.js:952:14)\n    at ReadStream.onkeypress (readline.js:178:10)\n    at ReadStream.emit (events.js:182:13)\n    at emitKeys (internal/readline.js:424:14)' }
+GmhtJ6Xu9EDkZACGAAAD [::ffff:127.0.0.1] guest_36016 quit.
+Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 55706
+eJJZd4yijc-LriytAAAH [::ffff:127.0.0.1] joined as: guest_44515
+Issued: '.reload' at Tue Dec 25 2018 12:00:18 GMT+0200 (Eastern European Standard Time)
+Server launched at Tue Dec 25 2018 12:00:19 GMT+0200 (Eastern European Standard Time)
+Process 17976 Listening to port 8080
+Process 31932 Listening to port 8080
+Process 3260 Listening to port 8080
+Process 23132 Listening to port 8080
+Process 968 Listening to port 8080
+Process 29416 Listening to port 8080
+Process 22424 Listening to port 8080
+Process 23904 Listening to port 8080
+Process 13092 Listening to port 8080
+Process 31816 Listening to port 8080
+Process 26888 Listening to port 8080
+Process 28420 Listening to port 8080
+Received GET / 1.1 by IPv6 ::1 55841
+ubbkJKu-HO4Wo32rAAAB [::1] joined as: guest_80188
+Received GET / 1.1 by IPv6 ::1 55911
+mPqgrDCpROB0Nr8XAAAD [::1] joined as: guest_14271
+Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 55816
+e6h4OwuPNRRgdhgPAAAA [::ffff:127.0.0.1] joined as: guest_90351
+mPqgrDCpROB0Nr8XAAAD [::1] guest_14271 quit.
+Issued: '.reload' at Tue Dec 25 2018 12:15:00 GMT+0200 (Eastern European Standard Time)
+Server launched at Tue Dec 25 2018 12:15:01 GMT+0200 (Eastern European Standard Time)
+Process 21872 Listening to port 8080
+Process 12484 Listening to port 8080
+Process 25732 Listening to port 8080
+Process 19164 Listening to port 8080
+Process 16452 Listening to port 8080
+Process 30916 Listening to port 8080
+Process 2936 Listening to port 8080
+Process 19512 Listening to port 8080
+Process 10380 Listening to port 8080
+Process 24128 Listening to port 8080
+Process 21948 Listening to port 8080
+Process 34188 Listening to port 8080
+Received GET / 1.1 by IPv6 ::1 57270
+1KnLUZaT7tUvVbquAAAB [::1] joined as: guest_60109
+Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 57369
+Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 57369
+TYpgiTODCfJUfLLSAAAC [::ffff:127.0.0.1] joined as: guest_41420
+Received GET / 1.1 by IPv6 ::1 57381
+gXcVwG6_U_ajEcZrAAAA [::1] joined as: guest_60474
+Issued: '.say guest_60109 ok' at Tue Dec 25 2018 12:15:40 GMT+0200 (Eastern European Standard Time)
+Issued: '.reload' at Tue Dec 25 2018 12:16:11 GMT+0200 (Eastern European Standard Time)
+Server launched at Tue Dec 25 2018 12:16:12 GMT+0200 (Eastern European Standard Time)
+Process 26980 Listening to port 8080
+Process 18284 Listening to port 8080
+Process 16528 Listening to port 8080
+Process 32860 Listening to port 8080
+Process 34040 Listening to port 8080
+Process 25892 Listening to port 8080
+Process 11672 Listening to port 8080
+Process 20928 Listening to port 8080
+Process 31964 Listening to port 8080
+Process 35184 Listening to port 8080
+Process 23952 Listening to port 8080
+Process 26652 Listening to port 8080
+Received GET / 1.1 by IPv6 ::1 57505
+mgTbCgXvXnRhfDsgAAAA [::1] joined as: guest_78465
+Issued: '.say guest_78465 ok' at Tue Dec 25 2018 12:16:31 GMT+0200 (Eastern European Standard Time)
+mgTbCgXvXnRhfDsgAAAA [::1] guest_78465 quit.
+Received GET / 1.1 by IPv6 ::1 57576
+I7kbgtLOsTrn35-hAAAC [::1] joined as: guest_80867
+Issued: '.say guest_80867 ok' at Tue Dec 25 2018 12:16:43 GMT+0200 (Eastern European Standard Time)
+Issued: '.reload' at Tue Dec 25 2018 12:17:05 GMT+0200 (Eastern European Standard Time)
+Server launched at Tue Dec 25 2018 12:17:06 GMT+0200 (Eastern European Standard Time)
+Process 34992 Listening to port 8080
+Process 21732 Listening to port 8080
+Process 31632 Listening to port 8080
+Process 6036 Listening to port 8080
+Process 12524 Listening to port 8080
+Process 34860 Listening to port 8080
+Process 1316 Listening to port 8080
+Process 8816 Listening to port 8080
+Process 22932 Listening to port 8080
+Process 23796 Listening to port 8080
+Process 19568 Listening to port 8080
+Process 34980 Listening to port 8080
+Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 57670
+54N9RmCZJAmCHA3HAAAC [::ffff:127.0.0.1] joined as: guest_69594
+Issued: '.say guest_69594 ok' at Tue Dec 25 2018 12:17:25 GMT+0200 (Eastern European Standard Time)
+Issued: '.reload' at Tue Dec 25 2018 12:19:51 GMT+0200 (Eastern European Standard Time)
+Server launched at Tue Dec 25 2018 12:19:52 GMT+0200 (Eastern European Standard Time)
+Process 34200 Listening to port 8080
+Process 34736 Listening to port 8080
+Process 11752 Listening to port 8080
+Process 27216 Listening to port 8080
+Process 27664 Listening to port 8080
+Process 1968 Listening to port 8080
+Process 34588 Listening to port 8080
+Process 30468 Listening to port 8080
+Process 17952 Listening to port 8080
+Process 18484 Listening to port 8080
+Process 3788 Listening to port 8080
+Process 29464 Listening to port 8080
+Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 57978
+T21khz-8HN-qXzscAAAA [::1] joined as: guest_52374
+Issued: '.say guest_52374 oki' at Tue Dec 25 2018 12:20:10 GMT+0200 (Eastern European Standard Time)
+Received GET / 1.1 by IPv6 ::1 58084
+T21khz-8HN-qXzscAAAA [::1] guest_52374 quit.
+B_Z3acVKtHXR9bmOAAAA [::1] joined as: ok
+Issued: '.reload' at Tue Dec 25 2018 12:21:25 GMT+0200 (Eastern European Standard Time)
+Server launched at Tue Dec 25 2018 12:21:26 GMT+0200 (Eastern European Standard Time)
+Process 19936 Listening to port 8080
+Process 30616 Listening to port 8080
+Process 32836 Listening to port 8080
+Process 20856 Listening to port 8080
+Process 33580 Listening to port 8080
+Process 33596 Listening to port 8080
+Process 14740 Listening to port 8080
+Process 9604 Listening to port 8080
+Process 27676 Listening to port 8080
+Process 33408 Listening to port 8080
+Process 20432 Listening to port 8080
+Process 33084 Listening to port 8080
+Received GET / 1.1 by IPv6 ::1 58233
+lkhpBLZCyfZPT1n6AAAB [::1] joined as: guest_32028
+Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 58302
+Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 58302
+Al6iS9jo7szSMnchAAAC [::ffff:127.0.0.1] joined as: guest_11620
+Received GET / 1.1 by IPv6 ::ffff:127.0.0.1 58314
+fS_dTvqcLG15HRwzAAAA [::ffff:127.0.0.1] joined as: guest_58339
+Issued: ',say guest_32028 ok' at Tue Dec 25 2018 12:21:49 GMT+0200 (Eastern European Standard Time)
+{ SyntaxError: Unexpected token ,
+    at Command.exports.commands.eval.classes.Command.line [as exec] (C:\Users\CodeDragon\Desktop\workspace\Node\livechat\chat.js:105:81)
+    at Command.test (C:\Users\CodeDragon\Desktop\workspace\Node\livechat\src\classes.js:11:16)
+    at Interface.rl.on.exports.rlline.line (C:\Users\CodeDragon\Desktop\workspace\Node\livechat\chat.js:152:20)
+    at Interface.emit (events.js:182:13)
+    at Interface._onLine (readline.js:301:10)
+    at Interface._line (readline.js:673:8)
+    at Interface._ttyWrite (readline.js:952:14)
+    at ReadStream.onkeypress (readline.js:178:10)
+    at ReadStream.emit (events.js:182:13)
+    at emitKeys (internal/readline.js:424:14)
+  [message]: 'Unexpected token ,',
+  [stack]:
+   'SyntaxError: Unexpected token ,\n    at Command.exports.commands.eval.classes.Command.line [as exec] (C:\\Users\\CodeDragon\\Desktop\\workspace\\Node\\livechat\\chat.js:105:81)\n    at Command.test (C:\\Users\\CodeDragon\\Desktop\\workspace\\Node\\livechat\\src\\classes.js:11:16)\n    at Interface.rl.on.exports.rlline.line (C:\\Users\\CodeDragon\\Desktop\\workspace\\Node\\livechat\\chat.js:152:20)\n    at Interface.emit (events.js:182:13)\n    at Interface._onLine (readline.js:301:10)\n    at Interface._line (readline.js:673:8)\n    at Interface._ttyWrite (readline.js:952:14)\n    at ReadStream.onkeypress (readline.js:178:10)\n    at ReadStream.emit (events.js:182:13)\n    at emitKeys (internal/readline.js:424:14)' }
+Issued: '.say guest_32028 ok' at Tue Dec 25 2018 12:21:58 GMT+0200 (Eastern European Standard Time)
+Issued: '.sayall im your master!' at Tue Dec 25 2018 12:22:09 GMT+0200 (Eastern European Standard Time)
+Issued: '.reload' at Tue Dec 25 2018 12:22:20 GMT+0200 (Eastern European Standard Time)
+Server launched at Tue Dec 25 2018 12:22:21 GMT+0200 (Eastern European Standard Time)
+Process 35648 Listening to port 8080
+Process 28084 Listening to port 8080
+Process 34248 Listening to port 8080
+Process 20388 Listening to port 8080
+Process 32452 Listening to port 8080
+Process 27368 Listening to port 8080
+Process 1644 Listening to port 8080
+Process 29624 Listening to port 8080
+Process 30676 Listening to port 8080
+Process 24092 Listening to port 8080
+Process 18092 Listening to port 8080
+Process 19308 Listening to port 8080
+Received GET / 1.1 by IPv6 ::1 58401
+r7ezAio_kT_QKaTAAAAB [::1] joined as: guest_20580
+Received GET / 1.1 by IPv6 ::1 58495
+rQN5VmP_FtHHX42SAAAD [::1] joined as: guest_4563
+Received GET / 1.1 by IPv6 ::1 58507
+kV0qw-WTFWZak3YkAAAA [::1] joined as: guest_70829
+Issued: '.s git add .' at Tue Dec 25 2018 12:23:08 GMT+0200 (Eastern European Standard Time)

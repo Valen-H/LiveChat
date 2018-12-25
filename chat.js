@@ -52,8 +52,16 @@ console.error = function error(...args) {
 
 
 let commands = exports.commands = {
-	exit: new classes.Command('^' + config.prefix + "e(xit)?$", () => process.exit()),
-	quit: new classes.Command('^' + config.prefix + "q(uit)?$", () => rl.close()),
+	exit: new classes.Command('^' + config.prefix + "e(xit)?$", () => {
+		exports.logs.write("Shutting Down... " + Date());
+		process.exit();
+		return true;
+	}),
+	quit: new classes.Command('^' + config.prefix + "q(uit)?$", () => {
+		rl.close();
+		console.info(chalk.bold("CLI disabled!"));
+		return true;
+	}),
 	system: new classes.Command('^' + config.prefix + "s(ys(call)?)? .+$", line => syscall(drop(line))),
 	restart: new classes.Command('^' + config.prefix + "r(e(s(tart)?|l(oad)?))?$", () => process.exit(1)),
 	clear: new classes.Command('^' + config.prefix + "c(l(ea(r|n))?)?$", () => {
@@ -75,11 +83,26 @@ let commands = exports.commands = {
 			} else {
 				console.info(chalk.italic("Aborted."));
 			}
+			return true;
 		});
 		return true;
 	}),
+	say: new classes.Command('^' + config.prefix + "say .+? .+$", line => {
+		return transmit("dispatchTo", dropGet(line, 1), "message", drop(drop(line)), "<font color='red'><b>ADMIN</b></font>");
+	}),
+	sayall: new classes.Command('^' + config.prefix + "sayall .+$", line => {
+		return transmit("dispatch", "message", drop(line), "<font color='red'><b>ADMIN</b></font>");
+	}),
 	localeval: new classes.Command('^' + config.prefix + "e(v(al)?)? .+$", line => transmit("localeval", drop(line))),
-	eval: new classes.Command('', line => console.log(chalk.gray(util.inspect(eval(line)))) || true),
+	refresh: new classes.Command('^' + config.prefix + "ref(r(esh)?)?( .+)?$", line => {
+		if (line.split(' ').length >= 2) {
+			transmit("localeval", `if (nick == "${drop(line)}") {alert("Server commands you to Refresh.");location.reload()}`);
+		} else {
+			transmit("localeval", "alert('Server issued Refresh.');location.reload()");
+		}
+		return true;
+	}),
+	eval: new classes.Command('', line => console.log(chalk.gray(util.inspect(eval(line)))) || true)
 };
 
 
