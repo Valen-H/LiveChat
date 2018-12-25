@@ -16,8 +16,10 @@ class Command {
 } //Command
 
 class User {
-	constructor(name, sesId) {
-
+	constructor(name, sessId, servId = process.pid) {
+		this.name = name;
+		this.sessId = sessId;
+		this.servId = servId;
 	} //ctor
 } //User
 

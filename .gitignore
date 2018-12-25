@@ -1,4 +1,10 @@
 client/dist/*
 *.log
-node_modules
+node_modules/
 *.htm
+bin/
+.vs/
+obj/
+*.njsproj*
+*.sln
+*-lock.json
