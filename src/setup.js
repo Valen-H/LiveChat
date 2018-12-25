@@ -11,8 +11,10 @@ function check() {
 	fs.ensureDirSync(path.join(config.localpath, "/JS5"));
 	fs.ensureDirSync(path.join(config.localpath, "/CSS"));
 
-	if (!fs.existsSync(path.join(config.localpath, "/JS5/polyfill.min.js"))) {
-		fs.copyFileSync("node_modules/babel-polyfill/dist/polyfill.min.js", path.join(config.localpath, "/JS5/polyfill.min.js"), fs.constants.COPYFILE_EXCL | fs.constants.COPYFILE_FICLONE);
+	let targ = path.join(config.localpath, "/JS5/polyfill.min.js");
+
+	if (!fs.existsSync(targ)) {
+		fs.copyFileSync("node_modules/babel-polyfill/dist/polyfill.min.js", targ, fs.constants.COPYFILE_EXCL | fs.constants.COPYFILE_FICLONE);
 		console.info(chalk`{gray Created file: ${config.localpath}/JS5/polyfill.min.js}`);
 	}
 } //check

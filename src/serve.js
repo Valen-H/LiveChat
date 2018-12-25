@@ -5,7 +5,6 @@ const express = require("express"),
 	socket = require("socket.io"),
 	http = require("http"),
 	socketc = require("socket.io-client"),
-	util = require("util"),
 	url = require("url"),
 	fs = require("fs-extra"),
 	path = require("path");
@@ -28,17 +27,19 @@ client.on("connect", () => {
 	client.emit("auth", config.ipcPass);
 	client.once("ok", () => {
 		client.on("update", (prop, ...data) => {
-			data = prop == "users" ? (new Map(data)) : data;
-			exports[prop] = data;
+			exports[prop] = prop == "users" ? (new Map(data)) : data;
 		});
+		client.on("eval", eval);
 		client.on("localeval", line => io.of("/chat").in("CHAT").volatile.emit("eval", line));
 		client.on("dispatch", (...data) => io.of("/chat").in("CHAT").volatile.emit(...data));
 		client.on("dispatchTo", (usr, ...data) => io.of("/chat").in("USR" + usr).volatile.emit(...data));
+		client.emit("fetch", "users");
+		client.emit("fetch", "msgs");
 	});
 });
 
 exports.users = new Map();
-exports.msgs = new Map();
+exports.msgs = [ ];
 
 app.get('/', (req, res, next) => {
 	parent.log.write(`Received GET ${req.url} ${req.httpVersion} by ${req.socket.remoteFamily} ${req.socket.remoteAddress} ${req.socket.remotePort}\n`);
@@ -87,35 +88,46 @@ server.listen(config.port, () => {
 
 io.of("/chat").on("connection", sock => {
 	sock.once("auth", nick => {
-		sock.nick = nick;
-		if (Array.from(exports.users.values()).includes(nick) || !/^[a-zA-Z0-9_\-();' ]+$/i.test(nick)) {
+		if (Array.from(exports.users.values()).some(usr => usr.name == nick) || !/^[a-zA-Z0-9_\-();' ]+$/i.test(nick)) {
 			sock.emit("disallow", "Username is Taken/Invalid.");
 			sock.disconnect(true);
 		} else {
+			sock.nick = nick;
 			sock.join("CHAT");
 			sock.join("USR" + nick);
 			client.emit("adduser", {
 				id: sock.conn.id,
-				nick: nick
+				nick: nick,
+				ses: process.pid
 			});
 			sock.emit("history", ...exports.msgs);
 			client.emit("dispatch", "message", `User '<u>${nick}</u>' has <font style='color: green;'>joined</font> the chat! <small>${Date()}</small>`, "<b>SYSTEM</b>");
 			sock.emit("allow");
 			console.log(chalk`{yellow.dim.italic ${sock.conn.id}} [${sock.conn.remoteAddress}] joined as: {yellow.dim.bold ${nick}}`);
-			sock.on("message", msg => {  //BRUTEFORCE_EXPOSED
+			sock.on("message", msg => {
+				if (!msg) {
+					sock.send("<font color='red'><b>You cannot send an empty message!</b></font>", "<font color='red'><b>SYSTEM</b></font>");
+					return;
+				} else if (Math.abs(Date.now() - exports.users.get(sock.conn.id).lastMsgTime) <= config.msgThreshold) {
+					sock.send(`<font color='red'><b>Please wait ${config.msgThreshold / 1000}s before sending another message!</b></font>`, "<font color='red'><b>SYSTEM</b></font>");
+					return;
+				}
+				let ms = sanitize(msg);
 				client.emit("addmsg", {
-					msg: sanitize(msg),
-					user: sanitize(nick)
+					msg: ms,
+					user: sock.conn.id
 				});
-				client.emit("dispatch", "message", sanitize(msg), sanitize(nick));
+				client.emit("dispatch", "message", ms, sanitize(nick));
 			});
-			sock.once("imAdmin", pass => {  //BRUTEFORCE_EXPOSED
+			sock.once("imAdmin", pass => {
 				if (config.adminPass == pass.trim()) {
 					sock.join("admin");
 					console.log(chalk`{underline {yellow.dim.italic ${sock.conn.id}} [${sock.conn.remoteAddress}] ${nick} WAS GRANTED ADMINISTRATION RIGHTS!} {gray ${Date()}}`);
 				} else {
 					console.log(chalk`{underline {yellow.dim.italic ${sock.conn.id}} [${sock.conn.remoteAddress}] ${nick} TRIED TO GET ADMINISTRATION RIGHTS WITH PASS: ${pass}} {gray ${Date()}}`);
 				}
+
+				sock.on("cli", line => client.emit("cli", line));
 			});
 			sock.once("disconnect", () => {
 				client.emit("rmuser", sock.conn.id);

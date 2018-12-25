@@ -4,7 +4,8 @@
 	"ipcPass": "ipcPasss",
 	"adminPass": "adminPasss",
 	"localpath": "./client",
-	"prefix": "\\.",
+	"prefix": ".",
 	"logfile": "livechat.log",
-	"maxMsgs": 50
+	"maxMsgs": 50,
+	"msgThreshold": 800
 }

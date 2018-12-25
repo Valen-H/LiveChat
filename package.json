@@ -3,12 +3,12 @@
   "version": "0.0.1",
   "description": "A live chat web page.",
   "main": "chat.js",
-	"scripts": {
-		"test": "cd test ; node index.js",
-		"start": "node chat.js || npm start",
-		"build": "npx babel client/JS/ -d client/JS5/ -w --source-maps inline --ignore client/JS/polyfill.min.js",
-		"xpose": "showdown makehtml -i README.md -o client/readme.htm"
-	},
+  "scripts": {
+    "test": "cd test ; node index.js",
+    "start": "node chat.js || npm start",
+    "build": "npx babel client/JS/ -d client/JS5/ -w --source-maps inline --ignore client/JS/polyfill.min.js",
+    "xpose": "showdown makehtml -i README.md -o client/readme.htm"
+  },
   "bin": {
     "livechat": "./chat.js"
   },

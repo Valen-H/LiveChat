@@ -5,7 +5,10 @@ let text: object = {
 	area: null,
 	send: null
 },
-	scroll = 100;
+	scroll: number = 100,
+	historyIdx: number = 0,
+	hist: Array = [ ],
+	maxHistory: number = 50;
 
 const prefix: string = "!!";
 
@@ -44,12 +47,14 @@ function load(e?: object): void {
 	});
 	sock.once("history", (...data: string[]): void => {
 		for (let i of data) {
-			message(i.pop(), i.pop());
+			console.dir(i);
+			message(i.content, i.user.name);
 		}
 	});
 	sock.once("connect", (): void => {
 		text.area.innerHTML = '';
-		message("This is a Beta version of a chatting service, upcoming features are: profile picture support, message history view, spam defense, multiple chatrooms and more security!", "<font color='red'><b>SYSTEM</b></font>");
+		message("This is a Beta version of a chatting service, upcoming features are: profile picture support, multiple chatrooms and more security!", "<font color='red'><b>SYSTEM</b></font>");
+		message("<b>THIS SERVER DOES NOT FOLLOW PRIVACY RULES!! USE AT YOUR OWN AGREEMENT (GDPR)</b>", "<font color='red'><b>SYSTEM</b></font>");
 		message("<u>Please be kind and don't spam, we have means of banning aggitators.</u>", "<font color='red'><b>SYSTEM</b></font>");
 		console.info("The prefix is !!, type !!help in chat for commands.");
 	});
@@ -87,10 +92,27 @@ function message(msg: string, user: string): void {
 function shiftcheck(event: object, down: boolean = true): void {
 	if (event.key == "Shift") {
 		text.shift = down;
-	}
-	if (event.key == "Enter" && !text.shift && !down) {
+	} else if (event.key == "ArrowUp" && down) {
+		++historyIdx;
+		historyIdx %= hist.length;
+		text.send.value = hist[historyIdx];
+		return;
+	} else if (event.key == "ArrowUp") {
+		return;
+	} else if (event.key == "ArrowDown" && down) {
+		historyIdx = (historyIdx < 1) ? (hist.length - 1) : (historyIdx - 1);
+		text.send.value = hist[historyIdx];
+		return;
+	} else if (event.key == "ArrowDown") {
+		return;
+	} else if (event.key == "Enter" && !text.shift && !down) {
 		send();
+		hist.unshift('');
+		while (hist.length >= maxHistory) {
+			hist.pop();
+		}
 	}
+	hist[0] = text.send.value;
 } //shiftcheck
 
 function submit(e?: object): void {

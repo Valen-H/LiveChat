@@ -1,5 +1,7 @@
 ﻿/** @TODO
- * ADD MULTIPLE ROOMS, PROFILES AND BANS/REQUEST-TIMEOUT, MESSAGE HISTORY
+ * ADD MULTIPLE ROOMS, PROFILES AND BANS,
+ * ADD IN-PLACE CLIENT-COMMANDS LIKE: my name is ${nick}!
+ * ABILITY TO SAVE MESSAGE HISTORY(?) UPON RELAUNCH
  */
 
 /** ROOM THEORY
@@ -12,7 +14,6 @@
  */
 
 
-//FIRST-EXPANSION
 
 const readline = exports.readline = require("readline"),
 	cluster = exports.cluster = require("cluster"),
@@ -29,7 +30,15 @@ const config = exports.config = require("./configs/config.json"),
 	classes = exports.classes = require("./src/classes.js"),
 	yes = /^(ye?s?|ok|sure|true|affirmative)$/i;
 
-//SECOND-EXPANSION
+
+//SETUP
+
+exports.log = fs.createWriteStream(config.logfile, {
+	flags: 'a+',
+	mode: 0o750
+});
+exports.users = new Map();
+exports.msgs = [];
 
 util.inspect.defaultOptions.getters = util.inspect.defaultOptions.sorted = util.inspect.defaultOptions.showHidden = true;
 util.inspect.defaultOptions.depth = 3;
@@ -38,15 +47,6 @@ util.inspect.defaultOptions.maxArrayLength = 50;
 for (let i in process.env) {
 	config[i] = process.env[i];
 }
-
-exports.users = new Map();
-exports.msgs = [ ];
-
-const logs = exports.log = fs.createWriteStream(config.logfile, {
-	flags: 'a+',
-	mode: 0o750
-});
-
 
 console._log = console.log;
 console.log = function log(...args) {
@@ -59,27 +59,47 @@ console.error = function error(...args) {
 	return console._error(...args);
 };
 
+process.on("uncaughtException", err => {
+	console.error(chalk.red(util.inspect(err)));
+});
 
+process.on("unhandledRejection", err => {
+	console.error(chalk.redBright(util.inspect(err)));
+});
+//SETUP ^
+
+
+//COMMANDS
 let commands = exports.commands = {
-	exit: new classes.Command('^' + config.prefix + "e(xit)?$", () => {
+	exit: new classes.Command('^\\' + config.prefix + "e(xit)?$", () => {
 		exports.log.write("Shutting Down... " + Date());
 		process.exit();
 		return true;
 	}),
-	quit: new classes.Command('^' + config.prefix + "q(uit)?$", () => {
+	quit: new classes.Command('^\\' + config.prefix + "q(uit)?$", () => {
 		rl.close();
 		console.info(chalk.bold("CLI disabled!"));
 		return true;
 	}),
-	system: new classes.Command('^' + config.prefix + "s(ys(call)?)? .+$", line => syscall(drop(line))),
-	restart: new classes.Command('^' + config.prefix + "r(e(s(tart)?|l(oad)?))?$", () => process.exit(1)),
-	clear: new classes.Command('^' + config.prefix + "c(l(ea(r|n))?)?$", () => {
+	system: new classes.Command('^\\' + config.prefix + "s(ys(call)?)? .+$", line => syscall(drop(line))),
+	restart: new classes.Command('^\\' + config.prefix + "r(e(s(tart)?|l(oad)?))?$", () => process.exit(1)),
+	clear: new classes.Command('^\\' + config.prefix + "c(l(ea(r|n))?)?$", () => {
 		readline.cursorTo(process.stdout, 0, 0);
 		readline.clearScreenDown(process.stdout);
 		return true;
 	}),
-	logs: new classes.Command('^' + config.prefix + "l(ogs?)?$", () => fs.createReadStream(config.logfile).pipe(process.stdout)),
-	erase: new classes.Command('^' + config.prefix + "(erase|ers?)$", () => {
+	wipe: new classes.Command('^\\' + config.prefix + "w(ipe)?( \\d+)?$", line => {
+		let times = drop(line) || exports.msgs.length;
+		const t = times;
+		while (times--) {
+			exports.msgs.pop();
+		}
+		console.log(chalk.bold(chalk.magenta(t) + " messages wiped!"));
+		update("msgs");
+		return true;
+	}),
+	logs: new classes.Command('^\\' + config.prefix + "l(ogs?)?$", () => fs.createReadStream(config.logfile).pipe(process.stdout)),
+	erase: new classes.Command('^\\' + config.prefix + "(erase|ers?)$", () => {
 		exports.rl.question(chalk.bold("Are you sure you want to erase the logs? [THIS ACTION WILL BE RECORDED]: "), ans => {
 			if (yes.test(ans)) {
 				fs.truncate(config.logfile, 0, err => {
@@ -96,14 +116,14 @@ let commands = exports.commands = {
 		});
 		return true;
 	}),
-	say: new classes.Command('^' + config.prefix + "say .+? .+$", line => {
+	say: new classes.Command('^\\' + config.prefix + "say .+? .+$", line => {
 		return transmit("dispatchTo", dropGet(line, 1), "message", drop(drop(line)), "<font color='red'><b>ADMIN</b></font>");
 	}),
-	sayall: new classes.Command('^' + config.prefix + "sayall .+$", line => {
+	sayall: new classes.Command('^\\' + config.prefix + "sayall .+$", line => {
 		return transmit("dispatch", "message", drop(line), "<font color='red'><b>ADMIN</b></font>");
 	}),
-	localeval: new classes.Command('^' + config.prefix + "e(v(al)?)? .+$", line => transmit("localeval", drop(line))),
-	refresh: new classes.Command('^' + config.prefix + "ref(r(esh)?)?( .+)?$", line => {
+	localeval: new classes.Command('^\\' + config.prefix + "e(v(al)?)? .+$", line => transmit("localeval", drop(line))),
+	refresh: new classes.Command('^\\' + config.prefix + "ref(r(esh)?)?( .+)?$", line => {
 		if (line.split(' ').length >= 2) {
 			transmit("localeval", `if (nick == "${drop(line)}") {alert("Server commands you to Refresh.");location.reload()}`);
 		} else {
@@ -113,8 +133,10 @@ let commands = exports.commands = {
 	}),
 	eval: new classes.Command('', line => console.log(chalk.gray(util.inspect(eval(line)))) || true)
 };
+//COMMANDS ^
 
 
+//CLUSTER/RL/IPC/WATCH
 if (cluster.isMaster) {
 	require("./src/setup.js");
 	exports.log.write("Server launched at " + Date() + '\n');
@@ -139,6 +161,9 @@ if (cluster.isMaster) {
 			sock.on("adduser", adduser);
 			sock.on("rmuser", rmuser);
 			sock.on("addmsg", addmsg);
+			sock.on("cli", line => exports.rlline(line));
+			sock.on("eval", eval);
+			sock.on("fetch", update);
 			sock.on("dispatch", (...data) => ipc.of("/ipc").in("ipc").volatile.emit("dispatch", ...data));
 			sock.emit("ok");
 		});
@@ -169,7 +194,7 @@ if (cluster.isMaster) {
 		persistent: false
 	}, (evt, file) => {
 		if (file.endsWith(".js")) {
-			exports.rlline(".reload");
+			exports.rl.write(config.prefix + "reload\n");
 		}
 	}));
 
@@ -177,10 +202,10 @@ if (cluster.isMaster) {
 		persistent: false
 	}, (evt, file) => {
 		if (file.endsWith(".js")) {
-			exports.rlline(".reload");
+			exports.rl.write(config.prefix + "reload\n");
 		}
 	}));
-
+	
 	!process.env.BLOCKBUILD && syscall("npm run build");
 	
 	process.once("exit", code => {
@@ -190,31 +215,23 @@ if (cluster.isMaster) {
 } else {
 	require("./src/serve.js");
 }
+//CLUSTER/RL/IPC/WATCH ^
 
 
-process.on("uncaughtException", err => {
-	console.error(chalk.red(util.inspect(err)));
-});
+//FUNCTIONS
 
-process.on("unhandledRejection", err => {
-	console.error(chalk.redBright(util.inspect(err)));
-});
-
-
-function transmit(...data) {
-	return exports.ipc.of("/ipc").to("ipc").volatile.emit(...data);
-} //transmit
-
-function addmsg(msg) {
-	exports.msgs.push([msg.user, msg.msg]);
+async function addmsg(msg) {
+	exports.msgs.push(new classes.Message(exports.users.get(msg.user), msg.msg));
 	while (exports.msgs.length > config.maxMsgs) {
 		exports.msgs.shift();
 	}
+
+	await update("users");  //WITHOUT AWAIT MSGS ARE NOT TRANSMITTED!!
 	update("msgs");
 } //addmsg
 
 function adduser(user) {
-	exports.users.set(user.id, user.nick);
+	exports.users.set(user.id, new classes.User(user.nick, user.id, user.ses));
 	update("users");
 } //adduser
 
@@ -223,7 +240,12 @@ function rmuser(id) {
 	update("users");
 } //rmuser
 
-function update(prop) {
+
+function transmit(...data) {
+	return exports.ipc.of("/ipc").to("ipc").volatile.emit(...data);
+} //transmit
+
+async function update(prop) {
 	let params = prop == "users" ? Array.from(exports[prop]) : exports[prop];
 	return exports.ipc.of("/ipc").to("ipc").volatile.emit("update", prop, ...params);
 } //update
@@ -269,9 +291,14 @@ function syscall(execstring = "ls") {
 	return com;
 } //syscall
 
+//FUNCTIONS ^
+
 exports.syscall = syscall;
 exports.drop = drop;
 exports.dropGet = dropGet;
 exports.adduser = adduser;
+exports.addmsg = addmsg;
 exports.rmuser = rmuser;
 exports.update = update;
+exports.transmit = transmit;
+exports.console = console;
