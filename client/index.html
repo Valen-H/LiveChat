@@ -37,8 +37,11 @@
 </head>
 <body>
 	<div id="body-wrapper">
-		<div id="msgarea">
-			Loading...
+		<div id="ui-wrapper">
+			<div id="rooms"></div><br />
+			<div id="msgarea">
+				Loading...
+			</div>
 		</div><br />
 		<textarea id="txtarea" placeholder="Message..." onkeydown="shiftcheck(event, true)" onkeyup="shiftcheck(event, false)" autofocus required></textarea><br />
 		<button id="submit" onclick="submit(event)">Send</button>

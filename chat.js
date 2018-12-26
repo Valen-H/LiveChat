@@ -1,7 +1,7 @@
 ﻿/** @TODO
  * ADD MULTIPLE ROOMS, PROFILES AND BANS,
  * ADD IN-PLACE CLIENT-COMMANDS LIKE: my name is ${nick}!
- * ABILITY TO SAVE MESSAGE HISTORY(?) UPON RELAUNCH
+ * ABILITY TO SAVE MESSAGE-HISTORY/ROOMS (?) UPON RELAUNCH
  */
 
 /** ROOM THEORY
@@ -10,7 +10,7 @@
  * MAKING ROOM ALLOWS SETTING PASSWORD AND VISIBILITY OF NEW ROOM
  * JOINING ROOM REQUIRES PASSWORD ONCE UNLESS PASSWORD CHANGES AFTER FIRST AUTH
  * USR... -> USER-PRIVATE CHANNELS
- * CHAT -> GLOBAL CHAT (LOBBY)
+ * LOBBY -> GLOBAL CHANNEL
  */
 
 
@@ -37,8 +37,10 @@ exports.log = fs.createWriteStream(config.logfile, {
 	flags: 'a+',
 	mode: 0o750
 });
-exports.users = new Map();
-exports.msgs = [];
+
+exports.users = new Map();  //MAPPED BY sessId
+exports.rooms = new Map();  //MAPPED BY name
+exports.msgs = [ ];
 
 util.inspect.defaultOptions.getters = util.inspect.defaultOptions.sorted = util.inspect.defaultOptions.showHidden = true;
 util.inspect.defaultOptions.depth = 3;
@@ -71,24 +73,24 @@ process.on("unhandledRejection", err => {
 
 //COMMANDS
 let commands = exports.commands = {
-	exit: new classes.Command('^\\' + config.prefix + "e(xit)?$", () => {
+	exit: new classes.Command('^\\' + config.prefix + "e(xit)?$", async () => {
 		exports.log.write("Shutting Down... " + Date());
 		process.exit();
 		return true;
 	}),
-	quit: new classes.Command('^\\' + config.prefix + "q(uit)?$", () => {
+	quit: new classes.Command('^\\' + config.prefix + "q(uit)?$", async () => {
 		rl.close();
 		console.info(chalk.bold("CLI disabled!"));
 		return true;
 	}),
-	system: new classes.Command('^\\' + config.prefix + "s(ys(call)?)? .+$", line => syscall(drop(line))),
-	restart: new classes.Command('^\\' + config.prefix + "r(e(s(tart)?|l(oad)?))?$", () => process.exit(1)),
-	clear: new classes.Command('^\\' + config.prefix + "c(l(ea(r|n))?)?$", () => {
+	system: new classes.Command('^\\' + config.prefix + "s(ys(call)?)? .+$", async line => syscall(drop(line))),
+	restart: new classes.Command('^\\' + config.prefix + "r(e(s(tart)?|l(oad)?))?$", async () => process.exit(1)),
+	clear: new classes.Command('^\\' + config.prefix + "c(l(ea(r|n))?)?$", async () => {
 		readline.cursorTo(process.stdout, 0, 0);
 		readline.clearScreenDown(process.stdout);
 		return true;
 	}),
-	wipe: new classes.Command('^\\' + config.prefix + "w(ipe)?( \\d+)?$", line => {
+	wipe: new classes.Command('^\\' + config.prefix + "w(ipe)?( \\d+)?$", async line => {
 		let times = drop(line) || exports.msgs.length;
 		const t = times;
 		while (times--) {
@@ -98,8 +100,8 @@ let commands = exports.commands = {
 		update("msgs");
 		return true;
 	}),
-	logs: new classes.Command('^\\' + config.prefix + "l(ogs?)?$", () => fs.createReadStream(config.logfile).pipe(process.stdout)),
-	erase: new classes.Command('^\\' + config.prefix + "(erase|ers?)$", () => {
+	logs: new classes.Command('^\\' + config.prefix + "l(ogs?)?$", async () => fs.createReadStream(config.logfile).pipe(process.stdout)),
+	erase: new classes.Command('^\\' + config.prefix + "(erase|ers?)$", async () => {
 		exports.rl.question(chalk.bold("Are you sure you want to erase the logs? [THIS ACTION WILL BE RECORDED]: "), ans => {
 			if (yes.test(ans)) {
 				fs.truncate(config.logfile, 0, err => {
@@ -116,14 +118,14 @@ let commands = exports.commands = {
 		});
 		return true;
 	}),
-	say: new classes.Command('^\\' + config.prefix + "say .+? .+$", line => {
+	say: new classes.Command('^\\' + config.prefix + "say .+? .+$", async line => {
 		return transmit("dispatchTo", dropGet(line, 1), "message", drop(drop(line)), "<font color='red'><b>ADMIN</b></font>");
 	}),
-	sayall: new classes.Command('^\\' + config.prefix + "sayall .+$", line => {
+	sayall: new classes.Command('^\\' + config.prefix + "sayall .+$", async line => {
 		return transmit("dispatch", "message", drop(line), "<font color='red'><b>ADMIN</b></font>");
 	}),
-	localeval: new classes.Command('^\\' + config.prefix + "e(v(al)?)? .+$", line => transmit("localeval", drop(line))),
-	refresh: new classes.Command('^\\' + config.prefix + "ref(r(esh)?)?( .+)?$", line => {
+	localeval: new classes.Command('^\\' + config.prefix + "e(v(al)?)? .+$", async line => transmit("localeval", drop(line))),
+	refresh: new classes.Command('^\\' + config.prefix + "ref(r(esh)?)?( .+)?$", async line => {
 		if (line.split(' ').length >= 2) {
 			transmit("localeval", `if (nick == "${drop(line)}") {alert("Server commands you to Refresh.");location.reload()}`);
 		} else {
@@ -131,7 +133,8 @@ let commands = exports.commands = {
 		}
 		return true;
 	}),
-	eval: new classes.Command('', line => console.log(chalk.gray(util.inspect(eval(line)))) || true)
+	help: new classes.Command('^\\' + config.prefix + "he?lp$", async () => console.info(Object.keys(commands)) || true),
+	eval: new classes.Command('', async line => console.log(chalk.gray(util.inspect(eval(line)))) || true)
 };
 //COMMANDS ^
 
@@ -150,8 +153,8 @@ if (cluster.isMaster) {
 		cookie: false
 	});
 
-	ipc.of("/ipc").on("connection", sock => {
-		sock.once("auth", code => {
+	ipc.of("/ipc").on("connection", async sock => {
+		sock.once("auth", async code => {
 			if (code != config.ipcPass) {
 				sock.emit("disallowed");
 				sock.disconnect(true);
@@ -161,10 +164,10 @@ if (cluster.isMaster) {
 			sock.on("adduser", adduser);
 			sock.on("rmuser", rmuser);
 			sock.on("addmsg", addmsg);
-			sock.on("cli", line => exports.rlline(line));
+			sock.on("cli", exports.rlline);
 			sock.on("eval", eval);
 			sock.on("fetch", update);
-			sock.on("dispatch", (...data) => ipc.of("/ipc").in("ipc").volatile.emit("dispatch", ...data));
+			sock.on("dispatch", async (...data) => ipc.of("/ipc").in("ipc").volatile.emit("dispatch", ...data));
 			sock.emit("ok");
 		});
 	});
@@ -178,7 +181,7 @@ if (cluster.isMaster) {
 		output: process.stdout
 	});
 	
-	rl.on("line", exports.rlline = line => {
+	rl.on("line", exports.rlline = async line => {
 		exports.log.write(`Issued: '${line}' at ${Date()}\n`);
 
 		for (let i in commands) {
@@ -192,7 +195,7 @@ if (cluster.isMaster) {
 
 	!process.env.BLOCKRELOAD && (exports.watchersrc = fs.watch(path.join(__dirname, "src"), {
 		persistent: false
-	}, (evt, file) => {
+	}, async (evt, file) => {
 		if (file.endsWith(".js")) {
 			exports.rl.write(config.prefix + "reload\n");
 		}
@@ -200,7 +203,7 @@ if (cluster.isMaster) {
 
 	!process.env.BLOCKRELOAD && (exports.watcherroot = fs.watch("./", {
 		persistent: false
-	}, (evt, file) => {
+	}, async (evt, file) => {
 		if (file.endsWith(".js")) {
 			exports.rl.write(config.prefix + "reload\n");
 		}
@@ -208,7 +211,7 @@ if (cluster.isMaster) {
 	
 	!process.env.BLOCKBUILD && syscall("npm run build");
 	
-	process.once("exit", code => {
+	process.once("exit", async code => {
 		console.info(chalk.cyan(code));
 		exports.log.write("Master exited at '" + Date() + `' with ${code}\n`);
 	});
@@ -227,21 +230,21 @@ async function addmsg(msg) {
 	}
 
 	await update("users");  //WITHOUT AWAIT MSGS ARE NOT TRANSMITTED!!
-	update("msgs");
+	return update("msgs");
 } //addmsg
 
-function adduser(user) {
+async function adduser(user) {
 	exports.users.set(user.id, new classes.User(user.nick, user.id, user.ses));
-	update("users");
+	return update("users");
 } //adduser
 
-function rmuser(id) {
+async function rmuser(id) {
 	exports.users.delete(id);
-	update("users");
+	return update("users");
 } //rmuser
 
 
-function transmit(...data) {
+async function transmit(...data) {
 	return exports.ipc.of("/ipc").to("ipc").volatile.emit(...data);
 } //transmit
 
@@ -268,7 +271,7 @@ function dropGet(line, t = 0) {
 } //dropGet
 
 
-function syscall(execstring = "ls") {
+async function syscall(execstring = "ls") {
 	execstring = execstring.split(' ');
 
 	let com = cp.spawn(execstring.shift(), execstring, {
@@ -277,11 +280,11 @@ function syscall(execstring = "ls") {
 		shell: true
 	});
 
-	com.once("error", err => {
+	com.once("error", async err => {
 		console.error(chalk.redBright(util.inspect(err)));
 	});
 
-	com.once("close", code => {
+	com.once("close", async code => {
 		console.log(code ? chalk.yellow(code) : chalk.cyan(code));
 	});
 

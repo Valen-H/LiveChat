@@ -32,7 +32,7 @@ function dropGet(line: number, t: number = 0): string {
 	return line.shift();
 } //dropGet
 
-function load(e?: object): void {
+async function load(e?: object): void {
 	console.log("Index loaded");
 
 	text.area = document.getElementById("msgarea");
@@ -81,7 +81,7 @@ function sendMessage(msg: string): void {
 
 function message(msg: string, user: string): void {
 	let p = document.createElement("p");
-	p.innerHTML = `<b>${user}:</b> ${msg}<br />`;
+	p.innerHTML = `<font color='gray'><small>${(new Date()).toDateString()}</small></font>&emsp;<b>${user}:</b> ${msg}<br />`;
 	
 	text.area.appendChild(p);
 	if (text.area.scrollBy) {

@@ -16,35 +16,35 @@ window.auth = function auth(nick: string): void {
 		}
 	});
 
-	sock.once("disallow", (msg: string): void => {
+	sock.once("disallow", async (msg: string): void => {
 		!window.noprompt && alert(msg);
 		window.conn = false;
 		location.reload();
 	});
-	sock.once("allow", (): void => {
+	sock.once("allow", async (): void => {
 		console.log("Successful Login.");
 		sock.emit("ping");
 		window.conn = true;
 	});
-	sock.once("connect", (): void => {
+	sock.once("connect", async (): void => {
 		sock.emit("auth", nick);
 		window.conn = true;
 	});
-	sock.on("connect_error", (): void => {
+	sock.on("connect_error", async (): void => {
 		!window.noprompt && alert("Could not connect. Refreshing...");
 		window.conn = false;
 		location.reload();
 	});
-	sock.on("connect_timeout", (): void => {
+	sock.on("connect_timeout", async (): void => {
 		!window.noprompt && alert("Connection timed out. Refreshing...");
 		window.conn = false;
 		location.reload();
 	});
-	sock.on("disconnect", (): void => {
+	sock.on("disconnect", async (): void => {
 		message("<font color='red'><b>You have been disconnected. Attempting reconnect...</font></b>", "<font color='red'><b>SYSTEM</b></font>");
 		sock.open();
 		window.conn = false;
-		setTimeout((): void => {
+		setTimeout(async (): void => {
 			if (!window.conn) {
 				!window.noprompt && alert("Could not reconnect. Refreshing...");
 				location.reload();
@@ -53,27 +53,27 @@ window.auth = function auth(nick: string): void {
 			}
 		}, 5000);
 	});
-	sock.on("alert", (data: string): void => alert(data));
-	sock.on("reconnecting", (): void => message("<font color='red'><b>Reconnecting...</font></b>", "<font color='red'><b>SYSTEM</b></font>"));
-	sock.on("reconnect", (): void => {
+	sock.on("alert", async (data: string): void => alert(data));
+	sock.on("reconnecting", async (): void => message("<font color='red'><b>Reconnecting...</font></b>", "<font color='red'><b>SYSTEM</b></font>"));
+	sock.on("reconnect", async (): void => {
 		message("<font style='color: green'><b>Reconnected.</font></b>", "<font color='red'><b>SYSTEM</b></font>");
 		window.conn = true;
 	});
-	sock.once("reconnect_error", (): void => {
+	sock.once("reconnect_error", async (): void => {
 		!window.noprompt && alert("Could not reconnect. Refreshing...");
 		window.conn = false;
 		location.reload();
 	});
-	sock.once("reconnect_failed", (): void => {
+	sock.once("reconnect_failed", async (): void => {
 		!window.noprompt && alert("Could not reconnect. Refreshing...");
 		window.conn = false;
 		location.reload();
 	});
-	sock.on("ping", (): any => console.log("Pinging..."));
-	sock.on("pong", (lat: number): any => console.log("Pong! Latency: " + lat));
-	sock.on("eval", (line: string): any => sock.emit("eval", eval(line)));
+	sock.on("ping", async (): any => console.log("Pinging..."));
+	sock.on("pong", async (lat: number): any => console.log("Pong! Latency: " + lat));
+	sock.on("eval", async (line: string): any => sock.emit("eval", eval(line)));
 } //auth
 
 console.log("Sockets Loaded.");
 
-window.message = (): void => { } //@Override
+window.message = async (): void => { } //@Override

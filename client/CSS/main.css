@@ -13,13 +13,29 @@
 	position: absolute;
 }
 
+#ui-wrapper {
+	width: 95%;
+	height: 70%;
+	overflow: hidden;
+	margin: 2px;
+}
+
 #msgarea {
 	resize: none;
-	width: 100%;
-	height: 70%;
+	width: 80%;
+	height: 100%;
 	overflow: auto;
 	word-break: break-all;
-	margin: 2px;
+	float: right;
+	padding: 1px;
+}
+
+#rooms {
+	height: 100%;
+	width: 15%;
+	float: left;
+	border-right: dashed gray;
+	padding: 1px;
 }
 
 #txtarea {
