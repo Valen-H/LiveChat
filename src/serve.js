@@ -1,4 +1,8 @@
-﻿"use strict";
+﻿/**
+ * FIX HISTORY!!
+ */
+
+"use strict";
 
 const express = require("express"),
 	chalk = require("chalk"),
@@ -6,12 +10,14 @@ const express = require("express"),
 	http = require("http"),
 	socketc = require("socket.io-client"),
 	url = require("url"),
+	util = require("util"),
 	fs = require("fs-extra"),
 	path = require("path");
 
 const app = express(),
 	parent = module.parent.exports,
 	config = parent.config,
+	classes = parent.classes,
 	server = http.Server(app),
 	io = socket(server, {
 		pingInterval: 10000,
@@ -21,24 +27,29 @@ const app = express(),
 	}),
 	client = socketc.connect("http://localhost:" + config.ipcPort + "/ipc", {
 		path: "/ipc"
-	});
+	}),
+	chat = io.of("/chat");
 
 client.on("connect", async () => {
-	client.emit("auth", config.ipcPass);
+	client.emit("auth", config.ipcPass, process.pid);
 	client.once("ok", async () => {
 		client.on("update", async (prop, ...data) => {
-			exports[prop] = prop == "users" ? (new Map(data)) : data;
+			exports[prop] = /^(users|rooms)$/.test(prop) ? (new Map(data)) : data;
 		});
 		client.on("eval", eval);
-		client.on("localeval", async line => io.of("/chat").in("LOBBY").volatile.emit("eval", line));
-		client.on("dispatch", async (...data) => io.of("/chat").in("LOBBY").volatile.emit(...data));
-		client.on("dispatchTo", async (usr, ...data) => io.of("/chat").in("USR" + usr).volatile.emit(...data));
+		client.on("localeval", async line => chat.in("LOBBY").volatile.emit("eval", line));
+		client.on("dispatch", async (chan = "LOBBY", ...data) => chat.in(chan).volatile.emit(...data));
+		client.on("dispatchTo", async (usr, ...data) => chat.in(usr).volatile.emit(...data));
 		client.emit("fetch", "users");
-		client.emit("fetch", "msgs");
+		client.emit("fetch", "rooms");
 	});
 });
 
+exports.update = async function fetch(prop = "users") {
+	return client.emit("fetch", prop);
+};
 exports.users = new Map();
+exports.rooms = new Map();
 exports.msgs = [ ];
 
 app.get('/', async (req, res, next) => {
@@ -46,7 +57,7 @@ app.get('/', async (req, res, next) => {
 	next();
 });
 
-app.get("*.htmx", async  (req, res, next) => {
+app.get(/\.(html?|js|css)x$/i, async  (req, res, next) => {
 	let uri = url.parse(req.url), pth;
 
 	fs.access(pth = path.join(config.localpath, uri.pathname), fs.constants.F_OK, async err => {
@@ -86,24 +97,37 @@ server.listen(config.port, async () => {
 	console.log(chalk`Process {yellow.dim ${process.pid}} {bold Listening to port} {green ${config.port}}`);
 });
 
-io.of("/chat").on("connection", async sock => {
+chat.on("connection", async sock => {
 	sock.once("auth", async nick => {
 		if (Array.from(exports.users.values()).some(usr => usr.name == nick) || !/^[a-zA-Z0-9_\-();' ]+$/i.test(nick)) {
 			sock.emit("disallow", "Username is Taken/Invalid.");
 			sock.disconnect(true);
 		} else {
+			console.log(chalk`{yellow.dim.italic ${sock.conn.id}} [${sock.conn.remoteAddress}] joined as: {yellow.dim.bold ${nick}}`);
+			sock.prvroom = "USR" + nick;
 			sock.nick = nick;
-			sock.join("LOBBY");
-			sock.join("USR" + nick);
+			sock.room = "LOBBY";
+
+			sock.join("LOBBY", err => {
+				if (!err) {
+					sock.emit("joined", "LOBBY");
+					sock.emit("main", "LOBBY");
+				}
+			});
+			sock.join(sock.prvroom, err => !err && sock.emit("joined", sock.prvroom));
+
 			client.emit("adduser", {
 				id: sock.conn.id,
 				nick: nick,
-				ses: process.pid
+				ses: process.pid  //servId
 			});
-			sock.emit("history", ...exports.msgs);
-			client.emit("dispatch", "message", `User '<u>${nick}</u>' has <font color='green'>joined</font> the chat! <small>${Date()}</small>`, "<font color='red'><b>SYSTEM</b></font>");
-			sock.emit("allow");
-			console.log(chalk`{yellow.dim.italic ${sock.conn.id}} [${sock.conn.remoteAddress}] joined as: {yellow.dim.bold ${nick}}`);
+			/*client.emit("addroom", {
+				name: sock.prvroom,
+				pass: sock.conn.id,
+				owner: sock.nick,
+				visibility: false
+			});*/
+
 			sock.on("message", async msg => {
 				if (!msg) {
 					sock.send("<font color='red'><b>You cannot send an empty message!</b></font>", "<font color='red'><b>SYSTEM</b></font>");
@@ -117,7 +141,21 @@ io.of("/chat").on("connection", async sock => {
 					msg: ms,
 					user: sock.conn.id
 				});
-				client.emit("dispatch", "message", ms, sanitize(nick, sock));
+				client.emit("dispatch", sock.room, "message", ms, sanitize(nick, sock));
+
+			});
+			sock.on("switch", (room, pass) => {
+				if (exports.rooms.has(room) && exports.rooms.get(room).pass == pass) {
+					sock.join(room, err => {
+						if (!err) {
+							sock.emit("main", sock.room = room);
+							sock.emit("history", ...ofRoom(room));
+						}
+					});
+				} else {
+					sock.emit("alert", "Password Incorrect.");
+					sock.emit("history", ...ofRoom(sock.room));
+				}
 			});
 			sock.once("imAdmin", async pass => {  //SHALL NOT REPLY FOR SECURITY REASONS
 				if (config.adminPass == pass.trim()) {
@@ -131,19 +169,28 @@ io.of("/chat").on("connection", async sock => {
 			});
 			sock.once("disconnect", async () => {
 				client.emit("rmuser", sock.conn.id);
-				client.emit("dispatch", "message", `User '<u>${sock.nick}</u>' has <font color='red'>left</font> the chat... <small>${Date()}</small>`, "<font color='red'><b>SYSTEM</b></font>");
+				client.emit("dispatch", "LOBBY", "message", `User '<u>${sock.nick}</u>' has <font color='red'>left</font> the chat... <small>${Date()}</small>`, "<font color='red'><b>SYSTEM</b></font>");
 				console.log(chalk`{yellow.dim.italic ${sock.conn.id}} [${sock.conn.remoteAddress}] {yellow.dim.bold ${sock.nick}} quit.`);
 			});
+
+			sock.emit("history", ...ofRoom("LOBBY"));
+			client.emit("dispatch", "LOBBY", "message", `User '<u>${nick}</u>' has <font color='green'>joined</font> the chat! <small>${Date()}</small>`, "<font color='red'><b>SYSTEM</b></font>");
+			sock.emit("allow");
 		}
 	});
 });
+
+function ofRoom(name) {
+	return exports.rooms.get(name).messages;
+} //ofRoom
 
 function sanitize(msg, sock) {
 	msg = msg.replace(/&/gmi, "&amp;")
 		.replace(/</gmi, "&lt;")
 		.replace(/>/gmi, "&gt;")
 		.replace(/"/gmi, "&quot;")
-		.replace(/\$USR/g, sock.nick)
+		.replace(/\$USR/gi, sock.nick)
+		.replace(/\$d/gi, Date())
 		.replace(/\$b((.|\n)+?)\$b/gmi, "<b>$1</b>")
 		.replace(/\$i((.|\n)+?)\$i/gmi, "<i>$1</i>")
 		.replace(/\$u((.|\n)+?)\$u/gmi, "<u>$1</u>")

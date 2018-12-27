@@ -62,3 +62,21 @@
 #submit:active {
 	box-shadow: 1px 1px 2px 1px black;
 }
+
+.channel {
+	max-width: 97%;
+	user-select: none;
+	border-radius: 3%;
+	cursor: default;
+	transition: box-shadow 500ms;
+}
+
+.channel:hover {
+	box-shadow: 2px 2px 1px 1px rgb(255, 225, 0);
+	background: linear-gradient(rgba(255, 225, 0, .4), yellow);
+}
+
+.selected-chan {
+	text-shadow: 1px 1px 1px gray;
+	font-weight: bold;
+}

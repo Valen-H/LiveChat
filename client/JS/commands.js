@@ -16,13 +16,11 @@ class Command {
 } //Command
 
 let commands: object = {
-	disconnect: new Command('^' + prefix + "disc?(onnect)?$", (): any => sock.disconnect()),
-	connect: new Command('^' + prefix + "con(nect)?$", (): any => sock.open()),
-	admin: new Command('^' + prefix + "adm(in)? .+$", (line: string): any => sock.emit("imAdmin", drop(line))),
-	cli: new Command('^' + prefix + "cli ", (line: string): boolean => {
-		sock.emit("cli", drop(line.trim()));
-		return true;
-	})
+	disconnect: new Command('^' + prefix + "disc?(onnect)?$", async (): any => sock.disconnect()),
+	connect: new Command('^' + prefix + "con(nect)?$", async (): any => sock.open()),
+	admin: new Command('^' + prefix + "adm(in)? .+$", async (line: string): any => sock.emit("imAdmin", drop(line))),
+	cli: new Command('^' + prefix + "cli ", async (line: string): boolean => sock.emit("cli", drop(line.trim()))),
+	help: new Command('^' + prefix + "he?lp$", () => message("Available commands are : disconnect, connect, help", "<font color='red'><b>SYSTEM</b></font>"))
 };
 
 function command(line: string): void {

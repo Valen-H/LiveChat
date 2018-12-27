@@ -1,6 +1,6 @@
 ﻿/** @TODO
  * ADD MULTIPLE ROOMS, PROFILES AND BANS,
- * ADD IN-PLACE CLIENT-COMMANDS LIKE: my name is ${nick}!
+ * ADD IN-PLACE CLIENT-COMMANDS LIKE: my name is ${nick}!  ---
  * ABILITY TO SAVE MESSAGE-HISTORY/ROOMS (?) UPON RELAUNCH
  */
 
@@ -9,8 +9,8 @@
  * BUTTONS: MAKE ROOM, JOIN ROOM
  * MAKING ROOM ALLOWS SETTING PASSWORD AND VISIBILITY OF NEW ROOM
  * JOINING ROOM REQUIRES PASSWORD ONCE UNLESS PASSWORD CHANGES AFTER FIRST AUTH
- * USR... -> USER-PRIVATE CHANNELS
- * LOBBY -> GLOBAL CHANNEL
+ * USR... -> USER-PRIVATE CHANNELS  ---
+ * LOBBY -> GLOBAL CHANNEL  ---
  */
 
 
@@ -23,23 +23,25 @@ const readline = exports.readline = require("readline"),
 	cp = exports.cp = require("child_process"),
 	fs = exports.fs = require("fs-extra"),
 	strip = exports.stripAnsi = require("strip-ansi"),
-	path = require("path"),
-	socket = require("socket.io");
+	path = exports.path = require("path"),
+	socket = exports.socket = require("socket.io");
 
 const config = exports.config = require("./configs/config.json"),
 	classes = exports.classes = require("./src/classes.js"),
-	yes = /^(ye?s?|ok|sure|true|affirmative)$/i;
+	yes = exports.yes = /^(ye?s?|ok|sure|true|affirmative)$/i;
 
 
 //SETUP
 
-exports.log = fs.createWriteStream(config.logfile, {
+const logs = exports.log = fs.createWriteStream(config.logfile, {
 	flags: 'a+',
 	mode: 0o750
 });
 
+exports.update = () => { }  //@Override
 exports.users = new Map();  //MAPPED BY sessId
 exports.rooms = new Map();  //MAPPED BY name
+exports.procs = new Map();  //MAPPED BY pid
 exports.msgs = [ ];
 
 util.inspect.defaultOptions.getters = util.inspect.defaultOptions.sorted = util.inspect.defaultOptions.showHidden = true;
@@ -154,26 +156,33 @@ if (cluster.isMaster) {
 	});
 
 	ipc.of("/ipc").on("connection", async sock => {
-		sock.once("auth", async code => {
+		sock.once("auth", async (code, id) => {
 			if (code != config.ipcPass) {
 				sock.emit("disallowed");
 				sock.disconnect(true);
 				return;
 			}
+			sock.join("CLNT" + id);
 			sock.join("ipc");
 			sock.on("adduser", adduser);
 			sock.on("rmuser", rmuser);
 			sock.on("addmsg", addmsg);
+			sock.on("addroom", addroom);
 			sock.on("cli", exports.rlline);
 			sock.on("eval", eval);
 			sock.on("fetch", update);
 			sock.on("dispatch", async (...data) => ipc.of("/ipc").in("ipc").volatile.emit("dispatch", ...data));
+			sock.on("dispatchTo", async (to, ...data) => ipc.of("/ipc").to(to).volatile.emit("dispatch", ...data));
 			sock.emit("ok");
 		});
 	});
 
+	new classes.Room("LOBBY", '', "<SYSTEM>", true);
+
 	for (let cpu of os.cpus()) {
-		cluster.fork();
+		let wrk = cluster.fork();
+		wrk.on("online", () => exports.procs.set(wrk.process.pid, wrk));
+		wrk.on("exit", () => exports.procs.delete(wrk.process.pid));
 	}
 
 	let rl = exports.rl = readline.createInterface({
@@ -224,23 +233,34 @@ if (cluster.isMaster) {
 //FUNCTIONS
 
 async function addmsg(msg) {
-	exports.msgs.push(new classes.Message(exports.users.get(msg.user), msg.msg));
-	while (exports.msgs.length > config.maxMsgs) {
-		exports.msgs.shift();
-	}
-
-	await update("users");  //WITHOUT AWAIT MSGS ARE NOT TRANSMITTED!!
-	return update("msgs");
+	return exports.users.get(msg.user).addmsg(msg.msg);
 } //addmsg
 
 async function adduser(user) {
-	exports.users.set(user.id, new classes.User(user.nick, user.id, user.ses));
-	return update("users");
+	new classes.User(user.nick, user.id, user.ses);
+	joinroom(user.id, "LOBBY", '', true);
+	joinroom(user.id, "USR" + user.nick, user.id, false);
+	await update("users");
+	await update("rooms");
 } //adduser
 
+async function joinroom(user, room, pass, visibility) {
+	exports.users.get(user).join(room, pass, visibility);
+	await update("users");
+	await update("rooms");
+} //joinroom
+
+async function addroom(room) {
+	new classes.Room(room.name, room.pass, room.owner, room.visibility);
+	await update("users");
+	await update("rooms");
+} //addroom
+
 async function rmuser(id) {
-	exports.users.delete(id);
-	return update("users");
+	exports.rooms.get("USR" + exports.users.get(id).name).delete();
+	exports.users.get(id).quit();
+	await update("users");
+	await update("rooms");
 } //rmuser
 
 
@@ -249,8 +269,8 @@ async function transmit(...data) {
 } //transmit
 
 async function update(prop) {
-	let params = prop == "users" ? Array.from(exports[prop]) : exports[prop];
-	return exports.ipc.of("/ipc").to("ipc").volatile.emit("update", prop, ...params);
+	let params = /^(users|rooms)$/.test(prop) ? Array.from(exports[prop]) : exports[prop];
+	return await transmit("update", prop, ...params);
 } //update
 
 
@@ -300,6 +320,8 @@ exports.syscall = syscall;
 exports.drop = drop;
 exports.dropGet = dropGet;
 exports.adduser = adduser;
+exports.addroom = addroom;
+exports.joinroom = joinroom;
 exports.addmsg = addmsg;
 exports.rmuser = rmuser;
 exports.update = update;

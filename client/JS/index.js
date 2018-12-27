@@ -3,12 +3,15 @@
 let text: object = {
 	shift: false,
 	area: null,
-	send: null
+	send: null,
+	room: null
 },
 	scroll: number = 100,
 	historyIdx: number = 0,
-	hist: Array = [ ],
-	maxHistory: number = 50;
+	hist: Array = [''],
+	maxHistory: number = 50,
+	rooms: object = { },
+	room: string = "LOBBY";
 
 const prefix: string = "!!";
 
@@ -37,18 +40,37 @@ async function load(e?: object): void {
 
 	text.area = document.getElementById("msgarea");
 	text.send = document.getElementById("txtarea");
+	text.room = document.getElementById("rooms");
 
 	auth(nick);
 	setCookie("user", nick);
 	parseQueries();
 	
-	sock.on("message", (msg: string, nick: string): void => {
+	sock.on("message", async (msg: string, nick: string): void => {
 		message(msg, nick);
 	});
-	sock.once("history", (...data: string[]): void => {
+	sock.on("joined", chan => {
+		let chann = chan;
+		if (chan.startsWith("USR")) {
+			chann = "Private Channel";
+		}
+		let p = document.createElement("p");
+		p.classList.add("channel");
+		p.innerHTML = chann;
+		p.onclick = function click(e?: object) {
+			switchCur(chan);
+		};
+		rooms[chan] = p;
+		text.room.appendChild(p);
+	});
+	sock.on("main", name => {
+		rooms[room].classList.remove("selected-chan");
+		rooms[name].classList.add("selected-chan");
+		room = name;
+	});
+	sock.on("history", async (...data: string[]): void => {
 		for (let i of data) {
-			console.dir(i);
-			message(i.content, i.user.name);
+			message(i.content, i.user, (new Date(i.timestamp)).toDateString());
 		}
 	});
 	sock.once("connect", (): void => {
@@ -60,11 +82,17 @@ async function load(e?: object): void {
 	});
 } //load
 
+function switchCur(name: string = "LOBBY", pass: string = prompt("Password (Leave empty for public rooms)", '')) {
+	sock.emit("switch", name, pass);
+	text.area.innerHTML = '';
+} //switchCur
+
 function send(msg: string = text.send.value): void {
 	text.send.value = '';
 	if (msg.startsWith(prefix)) {
 		return command(msg);
 	}
+	msg = msg.replace(/\${((.|\n)+?)}/gm, (match, p) => eval(p));
 	msg = msg.trim();
 	sendMessage(msg);
 } //send
@@ -79,9 +107,9 @@ function sendMessage(msg: string): void {
 	}
 } //sendMessage
 
-function message(msg: string, user: string): void {
+function message(msg: string, user: string, date: string = (new Date()).toDateString()): void {
 	let p = document.createElement("p");
-	p.innerHTML = `<font color='gray'><small>${(new Date()).toDateString()}</small></font>&emsp;<b>${user}:</b> ${msg}<br />`;
+	p.innerHTML = `<font color='gray'><small>${date}</small></font>&emsp;<b>${user}:</b> ${msg}<br />`;
 	
 	text.area.appendChild(p);
 	if (text.area.scrollBy) {

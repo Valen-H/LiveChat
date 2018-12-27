@@ -15,6 +15,7 @@ The supported CLI commands are:
 * sayall msg - send message to all clients connected  
 * eval comm - send a command to be eval'd locally on client's pc  
 * refresh [clientId] - refresh all client browsers or a specific one  
+* help command - command(s) help  
 > When no command is passed but a message is given, it's executed locally on the server  
 > default commands prefix is '.', start all commands with this except the server-eval  
   
@@ -23,6 +24,9 @@ There are several in-chat commands too:
 * disconnect - Close WebSocket (which by default causes browser refresh in 5 seconds)  
 * admin pass - Login as admin through chat to unlock more commands  
 > Current chat prefix is `!!`  
+> *Inline commands also exist!!*  
+* `$bBOLD$b`, `$iItalic$i`, `$uUnderline$u`, `$USR`(username), `$d`(date)  
+> escape them as `$\b`  
   
 ## Other Features  
 * When the server main files are changed, the server automatically reloads unless the environmental variable BLOCKRELOAD is passed,  
