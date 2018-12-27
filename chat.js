@@ -93,13 +93,14 @@ let commands = exports.commands = {
 		return true;
 	}),
 	wipe: new classes.Command('^\\' + config.prefix + "w(ipe)?( \\d+)?$", async line => {
-		let times = drop(line) || exports.msgs.length;
+		let targ = Array.from(exports.rooms.values()).find(rm => rm.name == "LOBBY").messages,
+			times = drop(line) || targ.length;
 		const t = times;
 		while (times--) {
-			exports.msgs.pop();
+			targ.pop();
 		}
 		console.log(chalk.bold(chalk.magenta(t) + " messages wiped!"));
-		update("msgs");
+		update("rooms");
 		return true;
 	}),
 	logs: new classes.Command('^\\' + config.prefix + "l(ogs?)?$", async () => fs.createReadStream(config.logfile).pipe(process.stdout)),
@@ -137,7 +138,7 @@ let commands = exports.commands = {
 	}),
 	help: new classes.Command('^\\' + config.prefix + "he?lp$", async () => console.info(Object.keys(commands)) || true),
 	eval: new classes.Command('', async line => console.log(chalk.gray(util.inspect(eval(line)))) || true)
-};
+}, ipc;
 //COMMANDS ^
 
 
@@ -146,7 +147,7 @@ if (cluster.isMaster) {
 	require("./src/setup.js");
 	exports.log.write("Server launched at " + Date() + '\n');
 
-	const ipc = exports.ipc = socket({
+	ipc = exports.ipc = socket({
 		serveClient: false,
 		path: "/ipc"
 	});
@@ -155,24 +156,24 @@ if (cluster.isMaster) {
 		cookie: false
 	});
 
-	ipc.of("/ipc").on("connection", async sock => {
+	(ipc = exports.ipc = ipc.of("/ipc")).on("connection", async sock => {
 		sock.once("auth", async (code, id) => {
 			if (code != config.ipcPass) {
 				sock.emit("disallowed");
-				sock.disconnect(true);
-				return;
+				return sock.disconnect(true);
 			}
 			sock.join("CLNT" + id);
 			sock.join("ipc");
 			sock.on("adduser", adduser);
 			sock.on("rmuser", rmuser);
+			sock.on("switchroom", switchroom);
 			sock.on("addmsg", addmsg);
 			sock.on("addroom", addroom);
 			sock.on("cli", exports.rlline);
 			sock.on("eval", eval);
 			sock.on("fetch", update);
-			sock.on("dispatch", async (...data) => ipc.of("/ipc").in("ipc").volatile.emit("dispatch", ...data));
-			sock.on("dispatchTo", async (to, ...data) => ipc.of("/ipc").to(to).volatile.emit("dispatch", ...data));
+			sock.on("dispatch", async (...data) => ipc.in("ipc").volatile.emit("dispatch", ...data));
+			sock.on("dispatchTo", async (to, ...data) => ipc.to(to).emit("dispatch", ...data));
 			sock.emit("ok");
 		});
 	});
@@ -233,16 +234,22 @@ if (cluster.isMaster) {
 //FUNCTIONS
 
 async function addmsg(msg) {
-	return exports.users.get(msg.user).addmsg(msg.msg);
+	return await exports.users.get(msg.user).addmsg(msg.msg);
 } //addmsg
 
 async function adduser(user) {
-	new classes.User(user.nick, user.id, user.ses);
-	joinroom(user.id, "LOBBY", '', true);
-	joinroom(user.id, "USR" + user.nick, user.id, false);
+	new classes.User(user.name, user.sessId, user.servId);
+	joinroom(user.sessId, "LOBBY", '', true);
+	joinroom(user.sessId, "USR" + user.name, user.sessId, false);
 	await update("users");
 	await update("rooms");
 } //adduser
+
+async function switchroom(sessId, room = "LOBBY", pass = '') {
+	exports.users.get(sessId).switch(room, pass);
+	await update("users");
+	await update("rooms");
+} //switchroom
 
 async function joinroom(user, room, pass, visibility) {
 	exports.users.get(user).join(room, pass, visibility);
@@ -252,7 +259,6 @@ async function joinroom(user, room, pass, visibility) {
 
 async function addroom(room) {
 	new classes.Room(room.name, room.pass, room.owner, room.visibility);
-	await update("users");
 	await update("rooms");
 } //addroom
 
@@ -265,7 +271,7 @@ async function rmuser(id) {
 
 
 async function transmit(...data) {
-	return exports.ipc.of("/ipc").to("ipc").volatile.emit(...data);
+	return await exports.ipc.in("ipc").volatile.emit(...data);
 } //transmit
 
 async function update(prop) {
@@ -322,6 +328,7 @@ exports.dropGet = dropGet;
 exports.adduser = adduser;
 exports.addroom = addroom;
 exports.joinroom = joinroom;
+exports.switchroom = switchroom;
 exports.addmsg = addmsg;
 exports.rmuser = rmuser;
 exports.update = update;

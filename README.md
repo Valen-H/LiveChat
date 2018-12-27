@@ -39,3 +39,4 @@ Block the automatic rebuild with the BLOCKBUILD environmental variable.
 * Serving the special `.htmx`/`.htmlx`/`.jsx`/`.cssx` files leads to the translation of `@@\expression@@\` expressions in them before serving. Appending a `\` (escape sequence) after the `@@` escapes the whole expression from being evaluated (like this example).  
 > Note that these evaluations happen server-side!!  
 * The history of the last 50 messages posted is kept but discarded upon server restart. The max history size can be adjusted from the `config.json` file together with the passwords.  
+* There's also a spam filter that disallows sending requests faster than 800ms, change threshold in `config.json`  

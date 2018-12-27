@@ -36,6 +36,7 @@
 	float: left;
 	border-right: dashed gray;
 	padding: 1px;
+	overflow: auto;
 }
 
 #txtarea {

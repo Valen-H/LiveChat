@@ -25,10 +25,18 @@ const app = express(),
 		serveClient: true,
 		path: "/chat"
 	}),
-	client = socketc.connect("http://localhost:" + config.ipcPort + "/ipc", {
+	client = socketc.connect("http://127.0.0.1:" + config.ipcPort + "/ipc", {
 		path: "/ipc"
 	}),
 	chat = io.of("/chat");
+
+
+exports.update = async function fetch(prop = "users") {
+	return client.emit("fetch", prop);
+};
+exports.users = new Map();
+exports.rooms = new Map();
+exports.msgs = [ ];
 
 client.on("connect", async () => {
 	client.emit("auth", config.ipcPass, process.pid);
@@ -44,13 +52,6 @@ client.on("connect", async () => {
 		client.emit("fetch", "rooms");
 	});
 });
-
-exports.update = async function fetch(prop = "users") {
-	return client.emit("fetch", prop);
-};
-exports.users = new Map();
-exports.rooms = new Map();
-exports.msgs = [ ];
 
 app.get('/', async (req, res, next) => {
 	parent.log.write(`Received GET ${req.url} ${req.httpVersion} by ${req.socket.remoteFamily} ${req.socket.remoteAddress} ${req.socket.remotePort}\n`);
@@ -73,10 +74,10 @@ app.get(/\.(html?|js|css)x$/i, async  (req, res, next) => {
 						case ".htmx":
 						case ".htmlx":
 							break;
-						case "jsx":
+						case ".jsx":
 							mode = "text/javascript";
 							break;
-						case "cssx":
+						case ".cssx":
 							mode = "text/css";
 							break;
 					}
@@ -90,7 +91,7 @@ app.get(/\.(html?|js|css)x$/i, async  (req, res, next) => {
 });
 
 app.use(express.static(config.localpath, {
-	extensions: ["htmx", "html", "htm", "txt", "js"]
+	extensions: ["htmx", "html", "htm", "htmlx", "txt", "js", "jsx", "css", "cssx"]
 }));
 
 server.listen(config.port, async () => {
@@ -117,16 +118,10 @@ chat.on("connection", async sock => {
 			sock.join(sock.prvroom, err => !err && sock.emit("joined", sock.prvroom));
 
 			client.emit("adduser", {
-				id: sock.conn.id,
-				nick: nick,
-				ses: process.pid  //servId
+				sessId: sock.conn.id,
+				name: nick,
+				servId: process.pid
 			});
-			/*client.emit("addroom", {
-				name: sock.prvroom,
-				pass: sock.conn.id,
-				owner: sock.nick,
-				visibility: false
-			});*/
 
 			sock.on("message", async msg => {
 				if (!msg) {
@@ -145,11 +140,12 @@ chat.on("connection", async sock => {
 
 			});
 			sock.on("switch", (room, pass) => {
-				if (exports.rooms.has(room) && exports.rooms.get(room).pass == pass) {
+				if (exports.rooms.has(room) && (exports.rooms.get(room).pass == pass || exports.users.get(sock.conn.id).rooms.includes(room))) {
 					sock.join(room, err => {
 						if (!err) {
 							sock.emit("main", sock.room = room);
 							sock.emit("history", ...ofRoom(room));
+							client.emit("switchroom", sock.conn.id, room, pass);
 						}
 					});
 				} else {

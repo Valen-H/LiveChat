@@ -63,6 +63,7 @@ async function load(e?: object): void {
 		rooms[chan] = p;
 		text.room.appendChild(p);
 	});
+	sock.on("left", () => { });  //IMPL
 	sock.on("main", name => {
 		rooms[room].classList.remove("selected-chan");
 		rooms[name].classList.add("selected-chan");
@@ -82,7 +83,7 @@ async function load(e?: object): void {
 	});
 } //load
 
-function switchCur(name: string = "LOBBY", pass: string = prompt("Password (Leave empty for public rooms)", '')) {
+function switchCur(name: string = "LOBBY", pass: string = prompt("Password (Leave empty for public rooms or already authorized rooms)", '')) {
 	sock.emit("switch", name, pass);
 	text.area.innerHTML = '';
 } //switchCur
