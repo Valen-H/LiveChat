@@ -28,7 +28,8 @@ const app = express(),
 	client = socketc.connect("http://127.0.0.1:" + config.ipcPort + "/ipc", {
 		path: "/ipc"
 	}),
-	chat = io.of("/chat");
+	chat = io.of("/chat"),
+	nul = () => { };
 
 
 exports.update = async function fetch(prop = "users") {
@@ -38,20 +39,26 @@ exports.users = new Map();
 exports.rooms = new Map();
 exports.msgs = [ ];
 
+
+/**
+ * LISTENING TO MASTER COMMANDS
+ */
+//CLIENT
 client.on("connect", async () => {
 	client.emit("auth", config.ipcPass, process.pid);
 	client.once("ok", async () => {
 		client.on("update", async (prop, ...data) => {
 			exports[prop] = /^(users|rooms)$/.test(prop) ? (new Map(data)) : data;
 		});
-		client.on("eval", eval);
+		client.on("eval", async (txt, cb = nul) => cb(eval(txt)));
 		client.on("localeval", async line => chat.in("LOBBY").volatile.emit("eval", line));
-		client.on("dispatch", async (chan = "LOBBY", ...data) => chat.in(chan).volatile.emit(...data));
-		client.on("dispatchTo", async (usr, ...data) => chat.in(usr).volatile.emit(...data));
-		client.emit("fetch", "users");
+		client.on("dispatch", async (chan = "LOBBY", ...data) => chat.in(chan).volatile.emit(...data, chan));  //SEND TO ALL SIBLINGS
+		client.on("dispatchTo", async (usr, ...data) => chat.in(usr).volatile.emit(...data));  //SEND TO SPECIFIC SIBLING
+		client.emit("fetch", "users");  //FORCE UPDATE
 		client.emit("fetch", "rooms");
 	});
 });
+//CLIENT^
 
 app.get('/', async (req, res, next) => {
 	parent.log.write(`Received GET ${req.url} ${req.httpVersion} by ${req.socket.remoteFamily} ${req.socket.remoteAddress} ${req.socket.remotePort}\n`);
@@ -82,7 +89,7 @@ app.get(/\.(html?|js|css)x$/i, async  (req, res, next) => {
 							break;
 					}
 
-					res.set({ "content-type": mode + "; charset=utf-8" });
+					res.set({ "content-type": mode + "; charset=utf-8" });  //RENDERED AS PLAINTEXT WITHOUT
 					res.end(data.toString().replace(/@@(?!\\)(.+?)@@(?!\\)/mi, (match, p1, p) => eval(p)).replace(/@@\\/gi, "@@"));
 				}
 			});
@@ -99,6 +106,7 @@ server.listen(config.port, async () => {
 });
 
 chat.on("connection", async sock => {
+	client.emit("fetch", "rooms");
 	sock.once("auth", async nick => {
 		if (Array.from(exports.users.values()).some(usr => usr.name == nick) || !/^[a-zA-Z0-9_\-();' ]+$/i.test(nick)) {
 			sock.emit("disallow", "Username is Taken/Invalid.");
@@ -109,13 +117,13 @@ chat.on("connection", async sock => {
 			sock.nick = nick;
 			sock.room = "LOBBY";
 
-			sock.join("LOBBY", err => {
+			sock.join("LOBBY", async err => {
 				if (!err) {
 					sock.emit("joined", "LOBBY");
 					sock.emit("main", "LOBBY");
 				}
 			});
-			sock.join(sock.prvroom, err => !err && sock.emit("joined", sock.prvroom));
+			sock.join(sock.prvroom, async err => !err && sock.emit("joined", sock.prvroom));
 
 			client.emit("adduser", {
 				sessId: sock.conn.id,
@@ -137,16 +145,18 @@ chat.on("connection", async sock => {
 					user: sock.conn.id
 				});
 				client.emit("dispatch", sock.room, "message", ms, sanitize(nick, sock));
-
+				client.emit("fetch", "rooms");
 			});
-			sock.on("switch", (room, pass) => {
+			sock.on("switch", async (room, pass) => {
 				if (exports.rooms.has(room) && (exports.rooms.get(room).pass == pass || exports.users.get(sock.conn.id).rooms.includes(room))) {
-					sock.join(room, err => {
-						if (!err) {
-							sock.emit("main", sock.room = room);
-							sock.emit("history", ...ofRoom(room));
-							client.emit("switchroom", sock.conn.id, room, pass);
-						}
+					sock.leave(sock.room, async err => {
+						!err && sock.join(room, async err => {
+							if (!err) {
+								sock.emit("main", sock.room = room);
+								client.emit("switchroom", sock.conn.id, room, pass);
+								sock.emit("history", ...ofRoom(room));
+							}
+						});
 					});
 				} else {
 					sock.emit("alert", "Password Incorrect.");
@@ -185,7 +195,7 @@ function sanitize(msg, sock) {
 		.replace(/</gmi, "&lt;")
 		.replace(/>/gmi, "&gt;")
 		.replace(/"/gmi, "&quot;")
-		.replace(/\$USR/gi, sock.nick)
+		.replace(/\$USR/gi, sock.nick)  //COMMANDS
 		.replace(/\$d/gi, Date())
 		.replace(/\$b((.|\n)+?)\$b/gmi, "<b>$1</b>")
 		.replace(/\$i((.|\n)+?)\$i/gmi, "<i>$1</i>")

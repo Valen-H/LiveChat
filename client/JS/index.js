@@ -46,8 +46,8 @@ async function load(e?: object): void {
 	setCookie("user", nick);
 	parseQueries();
 	
-	sock.on("message", async (msg: string, nick: string): void => {
-		message(msg, nick);
+	sock.on("message", async (msg: string, nick: string, rm: string): void => {
+		if (rm == room) message(msg, nick);
 	});
 	sock.on("joined", chan => {
 		let chann = chan;

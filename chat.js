@@ -28,7 +28,8 @@ const readline = exports.readline = require("readline"),
 
 const config = exports.config = require("./configs/config.json"),
 	classes = exports.classes = require("./src/classes.js"),
-	yes = exports.yes = /^(ye?s?|ok|sure|true|affirmative)$/i;
+	yes = exports.yes = /^(ye?s?|ok|sure|true|affirmative)$/i,
+	nul = () => { };
 
 
 //SETUP
@@ -130,7 +131,7 @@ let commands = exports.commands = {
 	localeval: new classes.Command('^\\' + config.prefix + "e(v(al)?)? .+$", async line => transmit("localeval", drop(line))),
 	refresh: new classes.Command('^\\' + config.prefix + "ref(r(esh)?)?( .+)?$", async line => {
 		if (line.split(' ').length >= 2) {
-			transmit("localeval", `if (nick == "${drop(line)}") {alert("Server commands you to Refresh.");location.reload()}`);
+			transmit("localeval", `if (nick == "${drop(line)}") {alert("Server commands you to Refresh!");location.reload()}`);
 		} else {
 			transmit("localeval", "alert('Server issued Refresh.');location.reload()");
 		}
@@ -162,7 +163,7 @@ if (cluster.isMaster) {
 				sock.emit("disallowed");
 				return sock.disconnect(true);
 			}
-			sock.join("CLNT" + id);
+			sock.join("CLNT" + id);  //dispatchTo TARGETED
 			sock.join("ipc");
 			sock.on("adduser", adduser);
 			sock.on("rmuser", rmuser);
@@ -170,10 +171,10 @@ if (cluster.isMaster) {
 			sock.on("addmsg", addmsg);
 			sock.on("addroom", addroom);
 			sock.on("cli", exports.rlline);
-			sock.on("eval", eval);
+			sock.on("eval", async (txt, cb = nul) => cb(eval(txt)));
 			sock.on("fetch", update);
 			sock.on("dispatch", async (...data) => ipc.in("ipc").volatile.emit("dispatch", ...data));
-			sock.on("dispatchTo", async (to, ...data) => ipc.to(to).emit("dispatch", ...data));
+			sock.on("dispatchTo", async (to, ...data) => ipc.to(to).emit("dispatch", ...data));  //CLNT
 			sock.emit("ok");
 		});
 	});
