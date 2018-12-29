@@ -11,9 +11,11 @@ let text: object = {
 	hist: Array = [''],
 	maxHistory: number = 50,
 	rooms: object = { },
-	room: string = "LOBBY";
+	room: string = "LOBBY",
+	last = 0;
 
-const prefix: string = "!!";
+const prefix: string = "!!",
+	threshold = 800;
 
 window.nick = getCookie("user") || "guest_" + Math.round(Math.random() * 1e5);
 
@@ -42,6 +44,10 @@ async function load(e?: object): void {
 	text.send = document.getElementById("txtarea");
 	text.room = document.getElementById("rooms");
 
+	if (window.innerWidth <= 500) {
+		text.room.classList.add("shrink");
+	}
+
 	auth(nick);
 	setCookie("user", nick);
 	parseQueries();
@@ -49,16 +55,23 @@ async function load(e?: object): void {
 	sock.on("message", async (msg: string, nick: string, rm: string): void => {
 		if (rm == room) message(msg, nick);
 	});
-	sock.on("joined", chan => {
+	sock.on("joinable", (chan, pass) => {
 		let chann = chan;
+		if (chan in rooms) {
+			let p = rooms[chan];
+			p.onclick = function click(e?: object) {
+				switchCur(chan, pass ? undefined : '');
+			};
+			return;
+		}
 		if (chan.startsWith("USR")) {
-			chann = "Private Channel";
+			chann = `Private Channel\n (${chan})`;
 		}
 		let p = document.createElement("p");
 		p.classList.add("channel");
 		p.innerHTML = chann;
 		p.onclick = function click(e?: object) {
-			switchCur(chan);
+			switchCur(chan, pass ? undefined : '');
 		};
 		rooms[chan] = p;
 		text.room.appendChild(p);
@@ -71,7 +84,7 @@ async function load(e?: object): void {
 	});
 	sock.on("history", async (...data: string[]): void => {
 		for (let i of data) {
-			message(i.content, i.user, (new Date(i.timestamp)).toDateString());
+			if (i.room == room) message(i.content, i.user, (new Date(i.timestamp)).toDateString());
 		}
 	});
 	sock.once("connect", (): void => {
@@ -83,8 +96,8 @@ async function load(e?: object): void {
 	});
 } //load
 
-function switchCur(name: string = "LOBBY", pass: string = prompt("Password (Leave empty for public rooms or already authorized rooms)", '')) {
-	sock.emit("switch", name, pass);
+function switchCur(name: string = "LOBBY", pass: string = prompt("Password (Leave empty for public rooms or already authorized rooms)", ''), visible: boolean = true) {
+	sock.emit("switch", name, pass, visible);
 	text.area.innerHTML = '';
 } //switchCur
 
@@ -101,8 +114,11 @@ function send(msg: string = text.send.value): void {
 function sendMessage(msg: string): void {
 	if (!msg) {
 		message("<font color='red'><b>You cannot send an empty message!</b></font>", "<font color='red'><b>SYSTEM</b></font>");
+	} else if (Date.now() - last <= threshold) {
+		message(`<font color='red'><b>Please wait ${threshold / 1000}s before sending another message!</b></font>`, "<font color='red'><b>SYSTEM</b></font>");
 	} else if (conn) {
 		sock.send(msg);
+		last = Date.now();
 	} else {
 		message("<font color='red'><b>You cannot send messages while disconnected!</b></font>", "<font color='red'><b>SYSTEM</b></font>");
 	}
@@ -110,11 +126,13 @@ function sendMessage(msg: string): void {
 
 function message(msg: string, user: string, date: string = (new Date()).toDateString()): void {
 	let p = document.createElement("p");
-	p.innerHTML = `<font color='gray'><small>${date}</small></font>&emsp;<b>${user}:</b> ${msg}<br />`;
+	p.innerHTML = `<font color='gray'><small>${date}</small></font>&emsp;<b>${user}:</b> ${msg}<hr />`;
 	
 	text.area.appendChild(p);
 	if (text.area.scrollBy) {
 		text.area.scrollBy(0, scroll);
+	} else {
+		text.area.scrollTop += scroll;
 	}
 } //message
 

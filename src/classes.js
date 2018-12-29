@@ -38,6 +38,7 @@ class User {
 
 	addmsg(content) {
 		parent.rooms.get(this.room).addmsg(this.name, content);
+		this.lastMsgTime = Date.now();
 		return User.update();
 	} //addmsg
 
@@ -46,7 +47,7 @@ class User {
 			this.room = room;
 			return User.update();
 		} else {
-			if (join(room, pass)) {
+			if (this.join(room, pass)) {
 				this.room = room;
 				return User.update();
 			} else {
@@ -56,24 +57,25 @@ class User {
 	} //switch
 
 	join(room, pass, visibility) {
-		if (parent.rooms.has(room) && (parent.rooms.get(room).pass == pass || parent.rooms.get(room).owner == this.name)) {
+		if (parent.rooms.has(room) && (parent.rooms.get(room).pass == pass || parent.rooms.get(room).owner == this.name || this.rooms.includes(room))) {
 			if (!this.rooms.includes(room)) {
 				this.rooms.push(room);
+				return this.join(room, pass, visibility);
+			} else {
 				parent.rooms.get(room).adduser(this.sessId);
 				if (!this.room) this.switch(room, pass);
 				return User.update();
 			}
 		} else if (!parent.rooms.has(room)) {
 			new Room(room, pass, this.name, visibility);
-			this.join(room, pass);
-			return User.update();
+			return this.join(room, pass);
 		} else {
 			return false;
 		}
 	} //join
 
-	static update() {
-		return parent.update("users");
+	static async update() {
+		return await parent.update("users");
 	} //update
 
 	leave(room) {
@@ -109,7 +111,6 @@ class Message {
 		this.user = user;
 		this.content = content;
 		this.timestamp = timestamp;
-		Array.from(parent.users).filter(ar => ar[1].name == this.user)[0][1].lastMsgTime = this.timestamp;
 		this.room = room;
 		this.id = Message._id++;
 		User.update();
@@ -125,7 +126,7 @@ class Room {
 	constructor(name, pass = '', owner, visible = true) {
 		this.name = name;
 		this.pass = pass;
-		this.owner = owner;
+		this.owner = owner;  //name
 		this.visible = visible;
 		this.messages = [ ];
 		this.members = [ ];
@@ -133,7 +134,7 @@ class Room {
 		Room.update();
 	} //ctor
 
-	addmsg(user, content) {  //sessId
+	addmsg(user, content) {
 		this.messages.push(new Message(user, content, this.name));
 
 		while (this.messages.length >= parent.config.msgThreshold) {
@@ -157,8 +158,8 @@ class Room {
 		return Room.update();
 	} //rmuser
 
-	static update() {
-		return parent.update("rooms");
+	static async update() {
+		return await parent.update("rooms");
 	} //update
 
 	delete() {

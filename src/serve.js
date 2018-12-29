@@ -119,12 +119,17 @@ chat.on("connection", async sock => {
 
 			sock.join("LOBBY", async err => {
 				if (!err) {
-					sock.emit("joined", "LOBBY");
+					sock.emit("joinable", "LOBBY", false);
 					sock.emit("main", "LOBBY");
 				}
 			});
-			sock.join(sock.prvroom, async err => !err && sock.emit("joined", sock.prvroom));
-
+			sock.join(sock.prvroom, async err => !err && sock.emit("joinable", sock.prvroom, false));
+			Array.from(exports.rooms.values()).forEach(rm => {
+				if (rm.visibility) {
+					sock.emit("joinable", rm, !!rm.pass);
+				}
+			});
+			
 			client.emit("adduser", {
 				sessId: sock.conn.id,
 				name: nick,
@@ -133,24 +138,47 @@ chat.on("connection", async sock => {
 
 			sock.on("message", async msg => {
 				if (!msg) {
-					sock.send("<font color='red'><b>You cannot send an empty message!</b></font>", "<font color='red'><b>SYSTEM</b></font>");
+					sock.send("<font color='red'><b>You cannot send an empty message!</b></font>", "<font color='red'><b>SYSTEM</b></font>", sock.room);
 					return;
-				} else if (Math.abs(Date.now() - exports.users.get(sock.conn.id).lastMsgTime) <= config.msgThreshold) {
-					sock.send(`<font color='red'><b>Please wait ${config.msgThreshold / 1000}s before sending another message!</b></font>`, "<font color='red'><b>SYSTEM</b></font>");
+				} else if (Date.now() - exports.users.get(sock.conn.id).lastMsgTime <= config.msgThreshold) {
+					sock.send(`<font color='red'><b>Please wait ${config.msgThreshold / 1000}s before sending another message!</b></font>`, "<font color='red'><b>SYSTEM</b></font>", sock.room);
 					return;
 				}
 				let ms = sanitize(msg, sock);
 				client.emit("addmsg", {
 					msg: ms,
-					user: sock.conn.id
+					user: sock.nick,
+					id: sock.conn.id
 				});
 				client.emit("dispatch", sock.room, "message", ms, sanitize(nick, sock));
 				client.emit("fetch", "rooms");
 			});
-			sock.on("switch", async (room, pass) => {
-				if (exports.rooms.has(room) && (exports.rooms.get(room).pass == pass || exports.users.get(sock.conn.id).rooms.includes(room))) {
-					sock.leave(sock.room, async err => {
-						!err && sock.join(room, async err => {
+			sock.on("switch", async (room, pass, visibility) => {
+				if (exports.rooms.has(room) && (exports.rooms.get(room).pass == pass || exports.rooms.get(room).owner == sock.nick || exports.users.get(sock.conn.id).rooms.includes(room))) {
+					sock.emit("joinable", room, false);
+					sock.join(room, async err => {
+						if (!err) {
+							sock.emit("main", sock.room = room);
+							client.emit("switchroom", sock.conn.id, room, pass);
+							sock.emit("history", ...ofRoom(room));
+						}
+					});
+				} else if (exports.rooms.has(room)) {
+					sock.emit("alert", "Password Incorrect or your entrance is denied.");
+					sock.emit("history", ...ofRoom(sock.room));
+				} else {
+					client.emit("joinroom", {
+						id: sock.conn.id,
+						name: room,
+						pass: pass,
+						owner: sock.nick,
+						visibility: visibility
+					}, async cb => {
+						if (visibility) {
+							client.emit("dispatch", "LOBBY", "joinable", room, !!pass);
+						}
+						sock.emit("joinable", room, false);
+						sock.join(room, async err => {
 							if (!err) {
 								sock.emit("main", sock.room = room);
 								client.emit("switchroom", sock.conn.id, room, pass);
@@ -158,9 +186,6 @@ chat.on("connection", async sock => {
 							}
 						});
 					});
-				} else {
-					sock.emit("alert", "Password Incorrect.");
-					sock.emit("history", ...ofRoom(sock.room));
 				}
 			});
 			sock.once("imAdmin", async pass => {  //SHALL NOT REPLY FOR SECURITY REASONS

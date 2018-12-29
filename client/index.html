@@ -21,9 +21,10 @@
 	<!--<script type="text/javascript" src="https://unpkg.com/babel-standalone/babel.min.js" crossorigin="anonymous"></script>
 	<script type="text/javascript" src="https://unpkg.com/react/umd/react.production.min.js" crossorigin="anonymous"></script>
 	<script type="text/javascript" src="https://unpkg.com/react-dom/umd/react-dom.production.min.js" crossorigin="anonymous"></script>-->
-	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/prefixfree/1.0.7/prefixfree.min.js"></script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/prefixfree/1.0.7/prefixfree.min.js" async></script>
 	<script type="text/javascript" src="/chat/socket.io.js"></script>
 	<script type="text/javascript" src="JS5/polyfill.min.js"></script>
+	<script type="text/javascript" src="JS5/popup.js" defer></script>
 	<script type="text/javascript" src="JS5/socket.js" defer></script>
 	<script type="text/javascript" src="JS5/index.js" defer></script>
 	<script type="text/javascript" src="JS5/commands.js" defer></script>
@@ -38,14 +39,18 @@
 <body>
 	<div id="body-wrapper">
 		<div id="ui-wrapper">
-			<div id="rooms"></div><br />
+			<div id="rooms">
+				<div id="xpand" onclick="text.room.classList.toggle('shrink')"><hr /><hr /><hr /></div><br />
+				<h3 id="title">Rooms:</h3><br />
+				<span id="makejoin"><button onclick="joinpop(event)">Create/Join</button></span><br />
+			</div><br />
 			<div id="msgarea">
 				Loading...
 			</div>
 		</div><br />
 		<textarea id="txtarea" placeholder="Message..." onkeydown="shiftcheck(event, true)" onkeyup="shiftcheck(event, false)" autofocus required></textarea><br />
 		<button id="submit" onclick="submit(event)">Send</button><hr />
-		<footer><small>Made by <i>V. H.</i> (AKA: <abbr title="Valen. H.">matthaios illiakis</abbr>)</small></footer>
+		<footer><small>Made by <i>V. H.</i> (AKA: <abbr title="Valen. H.">illiakis</abbr>)</small></footer>
 	</div>
 </body>
 </html>

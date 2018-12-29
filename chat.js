@@ -168,6 +168,7 @@ if (cluster.isMaster) {
 			sock.on("adduser", adduser);
 			sock.on("rmuser", rmuser);
 			sock.on("switchroom", switchroom);
+			sock.on("joinroom", (room, cb) => cb(joinroom(room)));
 			sock.on("addmsg", addmsg);
 			sock.on("addroom", addroom);
 			sock.on("cli", exports.rlline);
@@ -190,7 +191,7 @@ if (cluster.isMaster) {
 	let rl = exports.rl = readline.createInterface({
 		input: process.stdin,
 		output: process.stdout
-	});
+	}), ref = false;
 	
 	rl.on("line", exports.rlline = async line => {
 		exports.log.write(`Issued: '${line}' at ${Date()}\n`);
@@ -208,16 +209,32 @@ if (cluster.isMaster) {
 		persistent: false
 	}, async (evt, file) => {
 		if (file.endsWith(".js")) {
-			exports.rl.write(config.prefix + "reload\n");
+			exports.rlline(config.prefix + "reload");
 		}
+		exports.log.write(`${file}:${evt} changed at ${Date()}\n`);
 	}));
 
+	!process.env.BLOCKREFRESH && (exports.watcherclient = fs.watch(config.localpath, {
+		persistent: false,
+		recursive: true
+	}, async (evt, file) => {
+		if (!ref) {
+			ref = true;
+			setTimeout(() => {
+				ref = false;
+				exports.rlline(config.prefix + "refresh");
+			}, 700);
+		}
+		exports.log.write(`${file}:${evt} changed at ${Date()}\n`);
+	}));
+	
 	!process.env.BLOCKRELOAD && (exports.watcherroot = fs.watch("./", {
 		persistent: false
 	}, async (evt, file) => {
 		if (file.endsWith(".js")) {
-			exports.rl.write(config.prefix + "reload\n");
+			exports.rlline(config.prefix + "reload");
 		}
+		exports.log.write(`${file}:${evt} changed at ${Date()}\n`);
 	}));
 	
 	!process.env.BLOCKBUILD && syscall("npm run build");
@@ -235,13 +252,25 @@ if (cluster.isMaster) {
 //FUNCTIONS
 
 async function addmsg(msg) {
-	return await exports.users.get(msg.user).addmsg(msg.msg);
+	exports.users.get(msg.id).addmsg(msg.msg);
+	await update("users");
+	await update("rooms");
 } //addmsg
 
 async function adduser(user) {
 	new classes.User(user.name, user.sessId, user.servId);
-	joinroom(user.sessId, "LOBBY", '', true);
-	joinroom(user.sessId, "USR" + user.name, user.sessId, false);
+	joinroom({
+		id: user.sessId,
+		name: "LOBBY",
+		pass: '',
+		visibility: true
+	});
+	joinroom({
+		id: user.sessId,
+		name: "USR" + user.name,
+		pass: user.sessId,
+		visibility: false
+	});
 	await update("users");
 	await update("rooms");
 } //adduser
@@ -252,8 +281,8 @@ async function switchroom(sessId, room = "LOBBY", pass = '') {
 	await update("rooms");
 } //switchroom
 
-async function joinroom(user, room, pass, visibility) {
-	exports.users.get(user).join(room, pass, visibility);
+async function joinroom(room) {
+	exports.users.get(room.id).join(room.name, room.pass, room.visibility);
 	await update("users");
 	await update("rooms");
 } //joinroom
