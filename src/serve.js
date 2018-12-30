@@ -118,28 +118,29 @@ chat.on("connection", async sock => {
 			sock.prvroom = "USR" + nick;
 			sock.nick = nick;
 
-			sock.emit("joinable", sock.room = "LOBBY", false);
-			client.emit("dispatch", sock.room, "message", `User '<u>${sock.nick}</u>' has <font color='green'>joined</font> the chat! <small>${Date()}</small>`, "<font color='red'><b>SYSTEM</b></font>");
-			sock.join(sock.room, async err => {
-				if (!err) {
-					client.emit("switchroom", sock.conn.id, sock.room, '', async thn => {
-						sock.emit("main", sock.room, async thn => {
-							sock.emit("history", ...ofRoom(sock.room));
-						});
-						client.emit("dispatch", sock.room, "user", sock.nick);
-					});
-				}
-			});
-			sock.join(sock.prvroom, async err => !err && sock.emit("joinable", sock.prvroom, false));
-			Array.from(exports.rooms.values()).forEach(rm => {
-				if (rm.visibility) sock.emit("joinable", rm, !!rm.pass);
-			});
-
 			client.emit("adduser", {
 				sessId: sock.conn.id,
 				name: sock.nick,
 				servId: process.pid
+			}, async thn => {
+				client.emit("dispatch", sock.room, "message", `User '<u>${sock.nick}</u>' has <font color='green'>joined</font> the chat! <small>${Date()}</small>`, "<font color='red'><b>SYSTEM</b></font>");
+				sock.join(sock.room, async err => {
+					if (!err) {
+						client.emit("switchroom", sock.conn.id, sock.room, '', async thn => {
+							sock.emit("main", sock.room, async thn => {
+								sock.emit("history", ...ofRoom(sock.room));
+								Array.from(exports.users.values()).forEach(usr => client.emit("dispatch", sock.room, "user", usr.name));
+							});
+						});
+					}
+				});
+				sock.join(sock.prvroom, async err => !err && sock.emit("joinable", sock.prvroom, false));
+				Array.from(exports.rooms.values()).forEach(rm => {
+					if (rm.visibility) sock.emit("joinable", rm, !!rm.pass);
+				});
 			});
+
+			sock.emit("joinable", sock.room = "LOBBY", false);
 
 			sock.on("message", async msg => {
 				if (!msg) {
@@ -165,8 +166,8 @@ chat.on("connection", async sock => {
 							client.emit("switchroom", sock.conn.id, room, pass, async thn => {
 								sock.emit("main", sock.room = room, async thn => {
 									sock.emit("history", ...ofRoom(sock.room));
+									Array.from(exports.users.values()).forEach(usr => usr.rooms.includes(sock.room) && client.emit("dispatch", sock.room, "user", usr.name));
 								});
-								client.emit("dispatch", sock.room, "user", sock.nick);
 							});
 						}
 					});
@@ -190,8 +191,8 @@ chat.on("connection", async sock => {
 								client.emit("switchroom", sock.conn.id, room, pass, async thn => {
 									sock.emit("main", sock.room = room, async thn => {
 										sock.emit("history", ...ofRoom(sock.room));
+										Array.from(exports.users.values()).forEach(usr => usr.rooms.includes(sock.room) && client.emit("dispatch", sock.room, "user", usr.name));
 									});
-									client.emit("dispatch", sock.room, "user", sock.nick);
 								});
 							}
 						});
@@ -214,6 +215,7 @@ chat.on("connection", async sock => {
 			});
 			sock.once("disconnect", async () => {
 				client.emit("rmuser", sock.conn.id);
+				client.emit("dispatch", "LOBBY", "userout", sock.nick);
 				client.emit("dispatch", "LOBBY", "message", `User '<u>${sock.nick}</u>' has <font color='red'>left</font> the chat... <small>${Date()}</small>`, "<font color='red'><b>SYSTEM</b></font>");
 				console.log(chalk`{yellow.dim.italic ${sock.conn.id}} [${sock.conn.remoteAddress}] {yellow.dim.bold ${sock.nick}} quit. {gray.dim ${Date()}}`);
 			});
