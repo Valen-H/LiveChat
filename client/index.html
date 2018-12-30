@@ -48,8 +48,9 @@
 				Loading...
 			</div>
 			<div id="users">
-				<div class="xpand xpandleft" onclick="text.user.classList.toggle('shrink-l');parexp()"><hr /><hr /><hr /></div><br />
+				<div class="xpand xpandleft" onclick="text.user.parentNode.classList.toggle('shrink-l');parexp()"><hr /><hr /><hr /></div><br />
 				<h3 id="title">Users:</h3><br />
+				<div id="appendUsers"></div>
 			</div>
 		</div><br />
 		<textarea id="txtarea" placeholder="Message..." onkeydown="shiftcheck(event, true)" onkeyup="shiftcheck(event, false)" autofocus required></textarea><br />

@@ -46,16 +46,19 @@ exports.msgs = [ ];
 //CLIENT
 client.on("connect", async () => {
 	client.emit("auth", config.ipcPass, process.pid);
-	client.once("ok", async () => {
+	client.once("ok", async (cb = async () => { }) => {
 		client.on("update", async (prop, ...data) => {
 			exports[prop] = /^(users|rooms)$/.test(prop) ? (new Map(data)) : data;
 		});
 		client.on("eval", async (txt, cb = nul) => cb(eval(txt)));
 		client.on("localeval", async line => chat.in("LOBBY").volatile.emit("eval", line));
-		client.on("dispatch", async (chan = "LOBBY", ...data) => chat.in(chan).volatile.emit(...data, chan));  //SEND TO ALL SIBLINGS
-		client.on("dispatchTo", async (usr, ...data) => chat.in(usr).volatile.emit(...data));  //SEND TO SPECIFIC SIBLING
-		client.emit("fetch", "users");  //FORCE UPDATE
-		client.emit("fetch", "rooms");
+		client.on("dispatch", async (chan = "LOBBY", ...data) => {
+			chat.in(chan).volatile.emit(...data, chan);
+			client.emit("fetch", "rooms");
+			client.emit("fetch", "users");
+		});  //SEND TO ALL SIBLINGS
+		client.on("dispatchTo", async (usr, ...data) => chat.in(usr).volatile.emit(...data));  //SEND TO SPECIFIC SIBLING  OBS
+		await cb("hit-me");
 	});
 });
 //CLIENT^
@@ -102,37 +105,39 @@ app.use(express.static(config.localpath, {
 }));
 
 server.listen(config.port, async () => {
-	console.log(chalk`Process {yellow.dim ${process.pid}} {bold Listening to port} {green ${config.port}}`);
+	console.log(chalk`Process {yellow.dim ${process.pid}} {bold Listening to port} {green ${config.port}} {gray.dim ${Date()}}`);
 });
 
 chat.on("connection", async sock => {
-	client.emit("fetch", "rooms");
 	sock.once("auth", async nick => {
 		if (Array.from(exports.users.values()).some(usr => usr.name == nick) || !/^[a-zA-Z0-9_\-();' ]+$/i.test(nick)) {
 			sock.emit("disallow", "Username is Taken/Invalid.");
 			sock.disconnect(true);
 		} else {
-			console.log(chalk`{yellow.dim.italic ${sock.conn.id}} [${sock.conn.remoteAddress}] joined as: {yellow.dim.bold ${nick}}`);
+			console.log(chalk`{yellow.dim.italic ${sock.conn.id}} [${sock.conn.remoteAddress}] joined as: {yellow.dim.bold ${nick}} {gray.dim ${Date()}}`);
 			sock.prvroom = "USR" + nick;
 			sock.nick = nick;
-			sock.room = "LOBBY";
 
-			sock.join("LOBBY", async err => {
+			sock.emit("joinable", sock.room = "LOBBY", false);
+			client.emit("dispatch", sock.room, "message", `User '<u>${sock.nick}</u>' has <font color='green'>joined</font> the chat! <small>${Date()}</small>`, "<font color='red'><b>SYSTEM</b></font>");
+			sock.join(sock.room, async err => {
 				if (!err) {
-					sock.emit("joinable", "LOBBY", false);
-					sock.emit("main", "LOBBY");
+					client.emit("switchroom", sock.conn.id, sock.room, '', async thn => {
+						sock.emit("main", sock.room, async thn => {
+							sock.emit("history", ...ofRoom(sock.room));
+						});
+						client.emit("dispatch", sock.room, "user", sock.nick);
+					});
 				}
 			});
 			sock.join(sock.prvroom, async err => !err && sock.emit("joinable", sock.prvroom, false));
 			Array.from(exports.rooms.values()).forEach(rm => {
-				if (rm.visibility) {
-					sock.emit("joinable", rm, !!rm.pass);
-				}
+				if (rm.visibility) sock.emit("joinable", rm, !!rm.pass);
 			});
-			
+
 			client.emit("adduser", {
 				sessId: sock.conn.id,
-				name: nick,
+				name: sock.nick,
 				servId: process.pid
 			});
 
@@ -150,17 +155,19 @@ chat.on("connection", async sock => {
 					user: sock.nick,
 					id: sock.conn.id
 				});
-				client.emit("dispatch", sock.room, "message", ms, sanitize(nick, sock));
-				client.emit("fetch", "rooms");
+				client.emit("dispatch", sock.room, "message", ms, sanitize(sock.nick, sock));
 			});
 			sock.on("switch", async (room, pass, visibility) => {
 				if (exports.rooms.has(room) && (exports.rooms.get(room).pass == pass || exports.rooms.get(room).owner == sock.nick || exports.users.get(sock.conn.id).rooms.includes(room))) {
 					sock.emit("joinable", room, false);
 					sock.join(room, async err => {
 						if (!err) {
-							sock.emit("main", sock.room = room);
-							client.emit("switchroom", sock.conn.id, room, pass);
-							sock.emit("history", ...ofRoom(room));
+							client.emit("switchroom", sock.conn.id, room, pass, async thn => {
+								sock.emit("main", sock.room = room, async thn => {
+									sock.emit("history", ...ofRoom(sock.room));
+								});
+								client.emit("dispatch", sock.room, "user", sock.nick);
+							});
 						}
 					});
 				} else if (exports.rooms.has(room)) {
@@ -180,9 +187,12 @@ chat.on("connection", async sock => {
 						sock.emit("joinable", room, false);
 						sock.join(room, async err => {
 							if (!err) {
-								sock.emit("main", sock.room = room);
-								client.emit("switchroom", sock.conn.id, room, pass);
-								sock.emit("history", ...ofRoom(room));
+								client.emit("switchroom", sock.conn.id, room, pass, async thn => {
+									sock.emit("main", sock.room = room, async thn => {
+										sock.emit("history", ...ofRoom(sock.room));
+									});
+									client.emit("dispatch", sock.room, "user", sock.nick);
+								});
 							}
 						});
 					});
@@ -191,21 +201,23 @@ chat.on("connection", async sock => {
 			sock.once("imAdmin", async pass => {  //SHALL NOT REPLY FOR SECURITY REASONS
 				if (config.adminPass == pass.trim()) {
 					sock.join("admin");
-					console.log(chalk`{underline {yellow.dim.italic ${sock.conn.id}} [${sock.conn.remoteAddress}] ${nick} WAS GRANTED ADMINISTRATION RIGHTS!} {gray ${Date()}}`);
+					console.log(chalk`{underline {yellow.dim.italic ${sock.conn.id}} [${sock.conn.remoteAddress}] ${sock.nick} WAS GRANTED ADMINISTRATION RIGHTS!} {gray.dim ${Date()}}`);
 				} else {
-					console.log(chalk`{underline {yellow.dim.italic ${sock.conn.id}} [${sock.conn.remoteAddress}] ${nick} TRIED TO GET ADMINISTRATION RIGHTS WITH PASS: ${pass}} {gray ${Date()}}`);
+					console.log(chalk`{underline {yellow.dim.italic ${sock.conn.id}} [${sock.conn.remoteAddress}] ${sock.nick} TRIED TO GET ADMINISTRATION RIGHTS WITH PASS: ${pass}} {gray.dim ${Date()}}`);
+					return;
 				}
 
-				sock.on("cli", async line => client.emit("cli", line));
+				sock.on("cli", async line => {
+					client.emit("cli", line);
+					console.log("CLI:", chalk.bold(line));
+				});
 			});
 			sock.once("disconnect", async () => {
 				client.emit("rmuser", sock.conn.id);
 				client.emit("dispatch", "LOBBY", "message", `User '<u>${sock.nick}</u>' has <font color='red'>left</font> the chat... <small>${Date()}</small>`, "<font color='red'><b>SYSTEM</b></font>");
-				console.log(chalk`{yellow.dim.italic ${sock.conn.id}} [${sock.conn.remoteAddress}] {yellow.dim.bold ${sock.nick}} quit.`);
+				console.log(chalk`{yellow.dim.italic ${sock.conn.id}} [${sock.conn.remoteAddress}] {yellow.dim.bold ${sock.nick}} quit. {gray.dim ${Date()}}`);
 			});
 
-			sock.emit("history", ...ofRoom("LOBBY"));
-			client.emit("dispatch", "LOBBY", "message", `User '<u>${nick}</u>' has <font color='green'>joined</font> the chat! <small>${Date()}</small>`, "<font color='red'><b>SYSTEM</b></font>");
 			sock.emit("allow");
 		}
 	});

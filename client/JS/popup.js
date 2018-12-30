@@ -1,8 +1,8 @@
-﻿const expand = 60;
+﻿const expand: number = 50;
 
-function popup() {
-	let blocc = document.createElement("div"),
-		main = document.createElement("div");
+function popup(): object {
+	let blocc: object = document.createElement("div"),
+		main: object = document.createElement("div");
 
 	blocc.classList.add("popup");
 	main.classList.add("expandable");
@@ -28,22 +28,22 @@ function popup() {
 	return main;
 } //popup
 
-function popupanimate(popup) {
+function popupanimate(popup: object): number {
 	popup.targ.style.width = (popup.wdt += window.innerWidth / popup.expandw) + "px";
 	popup.targ.style.height = (popup.hgt += window.innerHeight / popup.expandh) + "px";
 	popup.targ.style.top = ((window.innerHeight - popup.hgt) / 2) + "px";
 	popup.targ.style.left = ((window.innerWidth - popup.wdt) / 2) + "px";
 	popup.reps--;
-	window.requestAnimationFrame(() => popup.reps > 0 && popupanimate(popup));
+	return window.requestAnimationFrame(() => popup.reps > 0 && popupanimate(popup));
 } //popupanimate
 
-function popuphide(popup) {
+function popuphide(popup: object): number {
 	popup.targ.style.width = (popup.wdt -= window.innerWidth / popup.expandw) + "px";
 	popup.targ.style.height = (popup.hgt -= window.innerHeight / popup.expandh) + "px";
 	popup.targ.style.top = ((window.innerHeight - popup.hgt) / 2) + "px";
 	popup.targ.style.left = ((window.innerWidth - popup.wdt) / 2) + "px";
 	popup.reps--;
-	window.requestAnimationFrame(() => {
+	return window.requestAnimationFrame(() => {
 		if (popup.reps > 0) {
 			popuphide(popup);
 		} else {
@@ -52,7 +52,7 @@ function popuphide(popup) {
 	});
 } //popuphide
 
-function joinpop() {
+function joinpop(): any {
 	let main = popup(),
 		cancel = document.createElement("button"),
 		submit = document.createElement("button"),
@@ -75,7 +75,7 @@ function joinpop() {
 	visible.type = "checkbox";
 	vislabel.for = "roomvisible";
 	vislabel.innerHTML = "Visible?<br />";
-	cancel.onclick = function click() {
+	cancel.onclick = function click(): void {
 		popuphide({
 			targ: main,
 			wdt: main.offsetWidth,
@@ -87,7 +87,7 @@ function joinpop() {
 			reps: expand / 3
 		});
 	};
-	submit.onclick = function click() {
+	submit.onclick = function click(): void {
 		switchCur(room.value, pass.value, visible.checked);
 		popuphide({
 			targ: main,
@@ -109,5 +109,7 @@ function joinpop() {
 	main.appendChild(document.createElement("br"));
 	main.appendChild(submit);
 	main.appendChild(cancel);
-	main.appendChild(document.createElement("br"));
+	return main.appendChild(document.createElement("br"));
 } //joinpop
+
+console.info("Popups loaded.");

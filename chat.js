@@ -67,7 +67,6 @@ console.error = function error(...args) {
 process.on("uncaughtException", err => {
 	console.error(chalk.red(util.inspect(err)));
 });
-
 process.on("unhandledRejection", err => {
 	console.error(chalk.redBright(util.inspect(err)));
 });
@@ -85,7 +84,7 @@ let commands = exports.commands = {
 		exports.rl.close();
 		console.info(chalk.bold("CLI disabled!"));
 		return true;
-	}),
+	}),  //IMPL SERVERCLOSESTART
 	system: new classes.Command('^\\' + config.prefix + "s(ys(call)?)? .+$", async line => syscall(drop(line))),
 	restart: new classes.Command('^\\' + config.prefix + "r(e(s(tart)?|l(oad)?))?$", async () => process.exit(1)),
 	clear: new classes.Command('^\\' + config.prefix + "c(l(ea(r|n))?)?$", async () => {
@@ -157,6 +156,9 @@ if (cluster.isMaster) {
 		cookie: false
 	});
 
+	let conns = 0;
+	const maxconns = os.cpus().length;
+
 	(ipc = exports.ipc = ipc.of("/ipc")).on("connection", async sock => {
 		sock.once("auth", async (code, id) => {
 			if (code != config.ipcPass) {
@@ -176,13 +178,24 @@ if (cluster.isMaster) {
 			sock.on("fetch", update);
 			sock.on("dispatch", async (...data) => ipc.in("ipc").volatile.emit("dispatch", ...data));
 			sock.on("dispatchTo", async (to, ...data) => ipc.to(to).emit("dispatch", ...data));  //CLNT
-			sock.emit("ok");
+			sock.emit("ok", async hit => {
+				if (++conns == maxconns) {
+					await update("users");
+					await update("rooms");
+				}
+			});
+			exports.log.write(`${sock.conn.id} ok ${Date()}\n`);
 		});
 	});
 
-	new classes.Room("LOBBY", '', "<SYSTEM>", true);
+	addroom({
+		name: "LOBBY",
+		pass: '',
+		owner: "<SYSTEM>",
+		visibility: true
+	});
 
-	for (let cpu of os.cpus()) {
+	for (let cpu = 0; cpu < maxconns; cpu++) {
 		let wrk = cluster.fork();
 		wrk.on("online", () => exports.procs.set(wrk.process.pid, wrk));
 		wrk.on("exit", () => exports.procs.delete(wrk.process.pid));
@@ -211,7 +224,15 @@ if (cluster.isMaster) {
 		if (file.endsWith(".js")) {
 			exports.rlline(config.prefix + "reload");
 		}
-		exports.log.write(`${file}:${evt} changed at ${Date()}\n`);
+		exports.log.write(`${file}:${evt} at ${Date()}\n`);
+	}));
+	!process.env.BLOCKRELOAD && (exports.watcherroot = fs.watch("./", {
+		persistent: false
+	}, async (evt, file) => {
+		if (file.endsWith(".js")) {
+			exports.rlline(config.prefix + "reload");
+		}
+		if (!file.endsWith(".log")) exports.log.write(`${file}:${evt} at ${Date()}\n`);
 	}));
 
 	!process.env.BLOCKREFRESH && (exports.watcherclient = fs.watch(config.localpath, {
@@ -221,16 +242,7 @@ if (cluster.isMaster) {
 		setTimeout(() => {
 			exports.rlline(`${config.prefix}eval has.includes("${file.replace(/\\/gmi, '/')}")&&alrel("Server issued Refresh.")`);
 		}, 700);
-		exports.log.write(`${file}:${evt} changed at ${Date()}\n`);
-	}));
-	
-	!process.env.BLOCKRELOAD && (exports.watcherroot = fs.watch("./", {
-		persistent: false
-	}, async (evt, file) => {
-		if (file.endsWith(".js")) {
-			exports.rlline(config.prefix + "reload");
-		}
-		if (!file.endsWith(".log")) exports.log.write(`${file}:${evt} changed at ${Date()}\n`);
+		exports.log.write(`${file}:${evt} at ${Date()}\n`);
 	}));
 	
 	!process.env.BLOCKBUILD && syscall("npm run build");
@@ -247,21 +259,22 @@ if (cluster.isMaster) {
 
 //FUNCTIONS
 
-async function addmsg(msg) {
-	exports.users.get(msg.id).addmsg(msg.msg);
+async function addmsg(msg, cb = async () => { }) {
+	await exports.users.get(msg.id).addmsg(msg.msg);
 	await update("users");
 	await update("rooms");
+	return await cb();
 } //addmsg
 
-async function adduser(user) {
+async function adduser(user, cb = async () => { }) {
 	new classes.User(user.name, user.sessId, user.servId);
-	joinroom({
+	await joinroom({
 		id: user.sessId,
 		name: "LOBBY",
 		pass: '',
 		visibility: true
 	});
-	joinroom({
+	await joinroom({
 		id: user.sessId,
 		name: "USR" + user.name,
 		pass: user.sessId,
@@ -269,30 +282,40 @@ async function adduser(user) {
 	});
 	await update("users");
 	await update("rooms");
+	return await cb();
 } //adduser
 
-async function switchroom(sessId, room = "LOBBY", pass = '') {
+async function switchroom(sessId, room = "LOBBY", pass = '', cb = async () => { }) {
 	exports.users.get(sessId).switch(room, pass);
 	await update("users");
 	await update("rooms");
+	return await cb();
 } //switchroom
 
-async function joinroom(room) {
+async function joinroom(room, cb = async () => { }) {
 	exports.users.get(room.id).join(room.name, room.pass, room.visibility);
 	await update("users");
 	await update("rooms");
+	return await cb();
 } //joinroom
 
-async function addroom(room) {
+async function addroom(room, cb = async () => { }) {
 	new classes.Room(room.name, room.pass, room.owner, room.visibility);
 	await update("rooms");
+	return await cb();
 } //addroom
 
-async function rmuser(id) {
+async function rmuser(id, cb = async () => { }) {
 	exports.rooms.get("USR" + exports.users.get(id).name).delete();
+	Array.from(exports.rooms.values()).forEach(rm => {
+		if (rm.members.length == 1 && rm.name != "LOBBY") {
+			rm.delete();
+		}
+	});
 	exports.users.get(id).quit();
 	await update("users");
 	await update("rooms");
+	return await cb();
 } //rmuser
 
 
@@ -300,9 +323,9 @@ async function transmit(...data) {
 	return await exports.ipc.in("ipc").volatile.emit(...data);
 } //transmit
 
-async function update(prop) {
+async function update(prop, cb = async () => { }) {
 	let params = /^(users|rooms)$/.test(prop) ? Array.from(exports[prop]) : exports[prop];
-	return await transmit("update", prop, ...params);
+	return await cb(await transmit("update", prop, ...params));
 } //update
 
 

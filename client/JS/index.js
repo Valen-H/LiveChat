@@ -1,7 +1,6 @@
 ﻿"use strict";
 
 let text: object = {
-	shift: false,
 	area: null,
 	send: null,
 	room: null,
@@ -9,14 +8,16 @@ let text: object = {
 },
 	scroll: number = 100,
 	historyIdx: number = 0,
-	hist: Array = [''],
+	hist: Array = [ '' ],
 	maxHistory: number = 50,
 	rooms: object = { },
 	room: string = "LOBBY",
-	last = 0;
+	last: number = 0,
+	users: object = { },
+	shift: boolean = false;
 
 const prefix: string = "!!",
-	threshold = 800;
+	threshold: number = 800;
 
 window.has = [ ];
 
@@ -46,7 +47,7 @@ async function load(e?: object): void {
 	text.area = document.getElementById("msgarea");
 	text.send = document.getElementById("txtarea");
 	text.room = document.getElementById("rooms");
-	text.user = document.getElementById("users");
+	text.user = document.getElementById("appendUsers");
 
 	if (window.innerWidth <= 500) {
 		text.room.classList.add("shrink");
@@ -68,7 +69,7 @@ async function load(e?: object): void {
 	sock.on("message", async (msg: string, nick: string, rm: string): void => {
 		if (rm == room) message(msg, nick);
 	});
-	sock.on("joinable", (chan, pass) => {
+	sock.on("joinable", (chan: string, pass: string): void => {
 		let chann = chan;
 		if (chan in rooms) {
 			let p = rooms[chan];
@@ -83,17 +84,30 @@ async function load(e?: object): void {
 		let p = document.createElement("p");
 		p.classList.add("channel");
 		p.innerHTML = chann;
-		p.onclick = function click(e?: object) {
+		p.onclick = function click(e?: object): void {
 			switchCur(chan, pass ? undefined : '');
 		};
 		rooms[chan] = p;
 		text.room.appendChild(p);
 	});
-	sock.on("left", () => { });  //IMPL
-	sock.on("main", name => {
+	sock.on("user", (nick: string, chan: string): void => {
+		if ((nick in users) || chan != room) return;
+		let p = document.createElement("p");
+		p.classList.add("user");
+		p.innerHTML = nick;
+		users[nick] = p;
+		text.user.appendChild(p);
+	});
+	sock.on("userout", (nick: string): void => {
+		if (nick in users) {
+			users[nick].remove();
+			delete users[nick];
+		}
+	});
+	sock.on("main", (name: string, got: Function = (): void => { }): void => {
 		rooms[room].classList.remove("selected-chan");
 		rooms[name].classList.add("selected-chan");
-		room = name;
+		got(room = name);
 	});
 	sock.on("history", async (...data: string[]): void => {
 		for (let i of data) {
@@ -109,7 +123,7 @@ async function load(e?: object): void {
 	});
 } //load
 
-function parexp(del = true) {
+function parexp(del: boolean = true): any {
 	if (del) {
 		return setTimeout(parexp, 300, false);
 	}
@@ -121,20 +135,22 @@ function parexp(del = true) {
 	} else {
 		text.area.classList.remove("msgarealeft");
 	}
-	if (text.user.classList.contains("shrink-l")) {
+	if (text.user.parentNode.classList.contains("shrink-l")) {
 		exp += 20;
 	}
 	return text.area.style.width = exp + "%";
 } //parexp
 
-function alrel(text) {
+function alrel(text: string): any {
 	alrel = () => { };
 	alert(text);
 	return location.reload();
 } //alrel
 
-function switchCur(name: string = "LOBBY", pass: string = prompt("Password (Leave empty for public rooms or already authorized rooms)", ''), visible: boolean = true) {
+function switchCur(name: string = "LOBBY", pass: string = prompt("Password (Leave empty for public rooms or already authorized rooms)", ''), visible: boolean = true): string {
 	sock.emit("switch", name, pass, visible);
+	text.user.innerHTML = '';
+	users = { };
 	return text.area.innerHTML = '';
 } //switchCur
 
@@ -175,7 +191,7 @@ function message(msg: string, user: string, date: string = (new Date()).toDateSt
 
 function shiftcheck(event: object, down: boolean = true): void {
 	if (event.key == "Shift") {
-		text.shift = down;
+		shift = down;
 	} else if (event.key == "ArrowUp" && down) {
 		++historyIdx;
 		historyIdx %= hist.length;
@@ -187,7 +203,7 @@ function shiftcheck(event: object, down: boolean = true): void {
 		return text.send.value = hist[historyIdx];
 	} else if (event.key == "ArrowDown") {
 		return;
-	} else if (event.key == "Enter" && !text.shift && !down) {
+	} else if (event.key == "Enter" && !shift && !down) {
 		send();
 		hist.unshift('');
 		while (hist.length >= maxHistory) {
@@ -198,7 +214,7 @@ function shiftcheck(event: object, down: boolean = true): void {
 } //shiftcheck
 
 function submit(e?: object): void {
-	text.shift = false;
+	shift = false;
 	return shiftcheck({
 		key: "Enter"
 	}, false);
@@ -232,7 +248,7 @@ function getCookie(key: string): string {
 	return tmp.get(key);
 } //getCookie
 
-function parseQueries(loc: string = location.href) {
+function parseQueries(loc: string = location.href): void {
 	let out = loc.split('?').pop().replace(/#.*?$/, '').split('&').map(q => q.split('='));
 
 	for (let i of out) {
@@ -241,7 +257,7 @@ function parseQueries(loc: string = location.href) {
 } //parseQueries
 
 window.addEventListener("DOMContentLoaded", load);
-window.addEventListener("resize", window.resize = function resize(e) {
+window.addEventListener("resize", window.resize = function resize(e?: object): void {
 	let xp = document.getElementsByClassName("xpand");
 	xp[1].style.left = (document.getElementById("ui-wrapper").offsetWidth - xp[1].offsetWidth - xp[0].offsetLeft) + "px";
 });

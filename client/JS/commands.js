@@ -6,7 +6,7 @@ class Command {
 		this.exec = exc;
 	} //ctor
 
-	test(against: string = '') {
+	test(against: string = ''): any {
 		if (this.reg.test(against)) {
 			return this.exec(against);
 		}
@@ -20,7 +20,7 @@ let commands: object = {
 	connect: new Command('^' + prefix + "con(nect)?$", async (): any => sock.open()),
 	admin: new Command('^' + prefix + "adm(in)? .+$", async (line: string): any => sock.emit("imAdmin", drop(line))),
 	cli: new Command('^' + prefix + "cli ", async (line: string): boolean => sock.emit("cli", drop(line.trim()))),
-	help: new Command('^' + prefix + "he?lp$", () => message("Available commands are : disconnect, connect, help", "<font color='red'><b>SYSTEM</b></font>"))
+	help: new Command('^' + prefix + "he?lp$", (): any => message("Available commands are : disconnect, connect, help", "<font color='red'><b>SYSTEM</b></font>"))
 };
 
 function command(line: string): void {
@@ -32,3 +32,5 @@ function command(line: string): void {
 
 	message(`Command '${line}' not found.`, "<font color='red'><b>SYSTEM</b></font>");
 } //command
+
+console.info("Commands loaded.");
