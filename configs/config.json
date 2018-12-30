@@ -6,6 +6,6 @@
 	"localpath": "./client",
 	"prefix": ".",
 	"logfile": "livechat.log",
-	"maxMsgs": 100,
+	"maxMsgs": 50,
 	"msgThreshold": 800
 }

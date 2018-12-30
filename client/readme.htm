@@ -1,0 +1,55 @@
+<h1 id="livechat">LiveChat</h1>
+<p>LiveChat is a sytem built upon express4/socket.io/babel which offers chatting functionality over HTTP.  </p>
+<h2 id="cli">CLI</h2>
+<p>The supported CLI commands are:  </p>
+<ul>
+<li>exit - close server and exit cli  </li>
+<li>quit - close cli but keep server open  </li>
+<li>system comm - execute a system command  </li>
+<li>restart - restart server and cli  </li>
+<li>clear - clear cli output  </li>
+<li>logs - view logs  </li>
+<li>erase - erase logs  </li>
+<li>say id msg - send message to a client identified by his socket.io id  </li>
+<li>sayall msg - send message to all clients connected  </li>
+<li>eval comm - send a command to be eval'd locally on client's pc  </li>
+<li>refresh [clientId] - refresh all client browsers or a specific one  </li>
+<li>help command - command(s) help  </li>
+</ul>
+<blockquote>
+  <p>When no command is passed but a message is given, it's executed locally on the server<br />
+  default commands prefix is '.', start all commands with this except the server-eval  </p>
+</blockquote>
+<h2 id="browsercommands">Browser Commands</h2>
+<p>There are several in-chat commands too:  </p>
+<ul>
+<li>disconnect - Close WebSocket (which by default causes browser refresh in 5 seconds)  </li>
+<li>admin pass - Login as admin through chat to unlock more commands  </li>
+</ul>
+<blockquote>
+  <p>Current chat prefix is <code>!!</code><br />
+  <em>Inline commands also exist!!</em>  </p>
+  <ul>
+  <li><code>$bBOLD$b</code>, <code>$iItalic$i</code>, <code>$uUnderline$u</code>, <code>$USR</code>(username), <code>$d</code>(date)<br />
+  escape them as <code>$\b</code>  </li>
+  </ul>
+</blockquote>
+<h2 id="otherfeatures">Other Features</h2>
+<ul>
+<li>When the server main files are changed, the server automatically reloads unless the environmental variable BLOCKRELOAD is passed,<br />
+Similarily, when <code>client/JS</code> files are edited they get converted to ES5 and served under <code>client/JS5</code>, they get minified and Flow-compiled aswell,<br />
+Block the automatic rebuild with the BLOCKBUILD environmental variable.  </li>
+<li>The default serving path can be changed from <code>./client</code> to a custom one through <code>config.json</code>  </li>
+<li>You can force <code>babel</code> compilation with <code>npm run build</code> but this requires the package to be installed as <code>--save-dev</code> and default standards to be followed.  </li>
+<li>The server works with the Node-builtin <code>cluster</code> module and communicates with each shard with an <code>ipc</code> socket (not redis!)  </li>
+<li>The server auto-restarts on fatal/syntax errors and abnormal quits and catches globally unhandled errors.  </li>
+<li>Serving the special <code>.htmx</code>/<code>.htmlx</code>/<code>.jsx</code>/<code>.cssx</code> files leads to the translation of <code>@@\expression@@\</code> expressions in them before serving. Appending a <code>\</code> (escape sequence) after the <code>@@</code> escapes the whole expression from being evaluated (like this example).  </li>
+<li>There are also the special <code>.xtml</code>/<code>.xtm</code>/<code>.xjs</code>/<code>.xcss</code> files that get processed once at launch-time.  </li>
+</ul>
+<blockquote>
+  <p>Note that these evaluations happen server-side!!  </p>
+  <ul>
+  <li>The history of the last 50 messages posted is kept but discarded upon server restart. The max history size can be adjusted from the <code>config.json</code> file together with the passwords.  </li>
+  <li>There's also a spam filter that disallows sending requests faster than 800ms, change threshold in <code>config.json</code>  </li>
+  </ul>
+</blockquote>

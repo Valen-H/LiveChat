@@ -1,7 +1,6 @@
-client/dist/*
+client/dist/
 *.log
 node_modules/
-*.htm
 bin/
 .vs/
 obj/

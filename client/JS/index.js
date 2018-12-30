@@ -4,7 +4,8 @@ let text: object = {
 	shift: false,
 	area: null,
 	send: null,
-	room: null
+	room: null,
+	user: null
 },
 	scroll: number = 100,
 	historyIdx: number = 0,
@@ -16,6 +17,8 @@ let text: object = {
 
 const prefix: string = "!!",
 	threshold = 800;
+
+window.has = [ ];
 
 window.nick = getCookie("user") || "guest_" + Math.round(Math.random() * 1e5);
 
@@ -43,6 +46,7 @@ async function load(e?: object): void {
 	text.area = document.getElementById("msgarea");
 	text.send = document.getElementById("txtarea");
 	text.room = document.getElementById("rooms");
+	text.user = document.getElementById("users");
 
 	if (window.innerWidth <= 500) {
 		text.room.classList.add("shrink");
@@ -51,6 +55,15 @@ async function load(e?: object): void {
 	auth(nick);
 	setCookie("user", nick);
 	parseQueries();
+	resize();
+	
+	Array.from(document.querySelectorAll("script, link, img, audio, iframe")).forEach(el => {
+		let app = el.src || el.href;
+
+		if (app) {
+			window.has.push(app.replace(/^https?:\/{2}.+?\//gmi, ''));
+		}
+	});
 	
 	sock.on("message", async (msg: string, nick: string, rm: string): void => {
 		if (rm == room) message(msg, nick);
@@ -96,9 +109,33 @@ async function load(e?: object): void {
 	});
 } //load
 
+function parexp(del = true) {
+	if (del) {
+		return setTimeout(parexp, 300, false);
+	}
+	let exp = 60;
+	if (text.room.classList.contains("shrink-r")) {
+		text.area.classList.add("msgarealeft");
+		exp += 20;
+		console.info(text.area.style.left);
+	} else {
+		text.area.classList.remove("msgarealeft");
+	}
+	if (text.user.classList.contains("shrink-l")) {
+		exp += 20;
+	}
+	return text.area.style.width = exp + "%";
+} //parexp
+
+function alrel(text) {
+	alrel = () => { };
+	alert(text);
+	return location.reload();
+} //alrel
+
 function switchCur(name: string = "LOBBY", pass: string = prompt("Password (Leave empty for public rooms or already authorized rooms)", ''), visible: boolean = true) {
 	sock.emit("switch", name, pass, visible);
-	text.area.innerHTML = '';
+	return text.area.innerHTML = '';
 } //switchCur
 
 function send(msg: string = text.send.value): void {
@@ -108,19 +145,19 @@ function send(msg: string = text.send.value): void {
 	}
 	msg = msg.replace(/\${((.|\n)+?)}/gm, (match, p) => eval(p));
 	msg = msg.trim();
-	sendMessage(msg);
+	return sendMessage(msg);
 } //send
 
 function sendMessage(msg: string): void {
 	if (!msg) {
-		message("<font color='red'><b>You cannot send an empty message!</b></font>", "<font color='red'><b>SYSTEM</b></font>");
+		return message("<font color='red'><b>You cannot send an empty message!</b></font>", "<font color='red'><b>SYSTEM</b></font>");
 	} else if (Date.now() - last <= threshold) {
-		message(`<font color='red'><b>Please wait ${threshold / 1000}s before sending another message!</b></font>`, "<font color='red'><b>SYSTEM</b></font>");
+		return message(`<font color='red'><b>Please wait ${threshold / 1000}s before sending another message!</b></font>`, "<font color='red'><b>SYSTEM</b></font>");
 	} else if (conn) {
 		sock.send(msg);
-		last = Date.now();
+		return last = Date.now();
 	} else {
-		message("<font color='red'><b>You cannot send messages while disconnected!</b></font>", "<font color='red'><b>SYSTEM</b></font>");
+		return message("<font color='red'><b>You cannot send messages while disconnected!</b></font>", "<font color='red'><b>SYSTEM</b></font>");
 	}
 } //sendMessage
 
@@ -130,9 +167,9 @@ function message(msg: string, user: string, date: string = (new Date()).toDateSt
 	
 	text.area.appendChild(p);
 	if (text.area.scrollBy) {
-		text.area.scrollBy(0, scroll);
+		return text.area.scrollBy(0, scroll);
 	} else {
-		text.area.scrollTop += scroll;
+		return text.area.scrollTop += scroll;
 	}
 } //message
 
@@ -142,14 +179,12 @@ function shiftcheck(event: object, down: boolean = true): void {
 	} else if (event.key == "ArrowUp" && down) {
 		++historyIdx;
 		historyIdx %= hist.length;
-		text.send.value = hist[historyIdx];
-		return;
+		return text.send.value = hist[historyIdx];
 	} else if (event.key == "ArrowUp") {
 		return;
 	} else if (event.key == "ArrowDown" && down) {
 		historyIdx = (historyIdx < 1) ? (hist.length - 1) : (historyIdx - 1);
-		text.send.value = hist[historyIdx];
-		return;
+		return text.send.value = hist[historyIdx];
 	} else if (event.key == "ArrowDown") {
 		return;
 	} else if (event.key == "Enter" && !text.shift && !down) {
@@ -159,12 +194,12 @@ function shiftcheck(event: object, down: boolean = true): void {
 			hist.pop();
 		}
 	}
-	hist[0] = text.send.value;
+	return hist[0] = text.send.value;
 } //shiftcheck
 
 function submit(e?: object): void {
 	text.shift = false;
-	shiftcheck({
+	return shiftcheck({
 		key: "Enter"
 	}, false);
 } //submit
@@ -206,3 +241,7 @@ function parseQueries(loc: string = location.href) {
 } //parseQueries
 
 window.addEventListener("DOMContentLoaded", load);
+window.addEventListener("resize", window.resize = function resize(e) {
+	let xp = document.getElementsByClassName("xpand");
+	xp[1].style.left = (document.getElementById("ui-wrapper").offsetWidth - xp[1].offsetWidth - xp[0].offsetLeft) + "px";
+});

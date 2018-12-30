@@ -10,6 +10,7 @@ function check() {
 	fs.ensureDirSync(path.join(config.localpath, "/JS"));
 	fs.ensureDirSync(path.join(config.localpath, "/JS5"));
 	fs.ensureDirSync(path.join(config.localpath, "/CSS"));
+	fs.ensureDirSync(path.join(config.localpath, "/dist"));
 
 	let targ = path.join(config.localpath, "/JS5/polyfill.min.js");
 

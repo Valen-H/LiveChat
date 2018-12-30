@@ -82,7 +82,7 @@ let commands = exports.commands = {
 		return true;
 	}),
 	quit: new classes.Command('^\\' + config.prefix + "q(uit)?$", async () => {
-		rl.close();
+		exports.rl.close();
 		console.info(chalk.bold("CLI disabled!"));
 		return true;
 	}),
@@ -191,7 +191,7 @@ if (cluster.isMaster) {
 	let rl = exports.rl = readline.createInterface({
 		input: process.stdin,
 		output: process.stdout
-	}), ref = false;
+	});
 	
 	rl.on("line", exports.rlline = async line => {
 		exports.log.write(`Issued: '${line}' at ${Date()}\n`);
@@ -202,7 +202,7 @@ if (cluster.isMaster) {
 			}
 		}
 
-		console.info("Command not Found");
+		console.warn("Command not Found");
 	});
 
 	!process.env.BLOCKRELOAD && (exports.watchersrc = fs.watch(path.join(__dirname, "src"), {
@@ -218,13 +218,9 @@ if (cluster.isMaster) {
 		persistent: false,
 		recursive: true
 	}, async (evt, file) => {
-		if (!ref) {
-			ref = true;
-			setTimeout(() => {
-				ref = false;
-				exports.rlline(config.prefix + "refresh");
-			}, 700);
-		}
+		setTimeout(() => {
+			exports.rlline(`${config.prefix}eval has.includes("${file.replace(/\\/gmi, '/')}")&&alrel("Server issued Refresh.")`);
+		}, 700);
 		exports.log.write(`${file}:${evt} changed at ${Date()}\n`);
 	}));
 	
@@ -234,7 +230,7 @@ if (cluster.isMaster) {
 		if (file.endsWith(".js")) {
 			exports.rlline(config.prefix + "reload");
 		}
-		exports.log.write(`${file}:${evt} changed at ${Date()}\n`);
+		if (!file.endsWith(".log")) exports.log.write(`${file}:${evt} changed at ${Date()}\n`);
 	}));
 	
 	!process.env.BLOCKBUILD && syscall("npm run build");

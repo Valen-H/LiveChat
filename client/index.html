@@ -40,12 +40,16 @@
 	<div id="body-wrapper">
 		<div id="ui-wrapper">
 			<div id="rooms">
-				<div id="xpand" onclick="text.room.classList.toggle('shrink')"><hr /><hr /><hr /></div><br />
+				<div class="xpand" onclick="text.room.classList.toggle('shrink-r');parexp()"><hr /><hr /><hr /></div><br />
 				<h3 id="title">Rooms:</h3><br />
 				<span id="makejoin"><button onclick="joinpop(event)">Create/Join</button></span><br />
-			</div><br />
+			</div>
 			<div id="msgarea">
 				Loading...
+			</div>
+			<div id="users">
+				<div class="xpand xpandleft" onclick="text.user.classList.toggle('shrink-l');parexp()"><hr /><hr /><hr /></div><br />
+				<h3 id="title">Users:</h3><br />
 			</div>
 		</div><br />
 		<textarea id="txtarea" placeholder="Message..." onkeydown="shiftcheck(event, true)" onkeyup="shiftcheck(event, false)" autofocus required></textarea><br />
